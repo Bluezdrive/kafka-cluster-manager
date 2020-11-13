@@ -11,6 +11,7 @@ import org.apache.kafka.common.config.ConfigResource;
 import org.apache.kafka.common.resource.PatternType;
 import org.apache.kafka.common.resource.ResourcePattern;
 import org.apache.kafka.common.resource.ResourceType;
+import org.javatuples.Pair;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
@@ -116,8 +117,8 @@ class IntegrationTest {
             topicDescriptions.putAll(getTopicDescription(topicNameUserUpdated, 5));
             topicDescriptions.putAll(getTopicDescription(topicNameTestCreated, 3));
             final Map<ConfigResource, Config> configs = new HashMap<>();
-            configs.putAll(getConfig(topicNameUserUpdated, Map.entry("cleanup.policy", "compact"), Map.entry("min.compaction.lag.ms", "100")));
-            configs.putAll(getConfig(topicNameTestCreated));
+            configs.putAll(getConfig(topicNameUserUpdated, Set.of(Pair.with("cleanup.policy", "compact"), Pair.with("min.compaction.lag.ms", "100"))));
+            configs.putAll(getConfig(topicNameTestCreated, Collections.emptySet()));
             final String schemaString = "{ \"type\": \"string\" }";
 
             mockDescribeAcls(aclBindings);
@@ -147,8 +148,8 @@ class IntegrationTest {
             topicDescriptions.putAll(getTopicDescription(topicNameUserUpdated, 4));
             topicDescriptions.putAll(getTopicDescription(topicNameTestCreated, 3));
             final Map<ConfigResource, Config> topicConfigs = new HashMap<>();
-            topicConfigs.putAll(getConfig(topicNameUserUpdated, Map.entry("cleanup.policy", "compact"), Map.entry("min.compaction.lag.ms", "100")));
-            topicConfigs.putAll(getConfig(topicNameTestCreated));
+            topicConfigs.putAll(getConfig(topicNameUserUpdated, Set.of(Pair.with("cleanup.policy", "compact"), Pair.with("min.compaction.lag.ms", "100"))));
+            topicConfigs.putAll(getConfig(topicNameTestCreated, Collections.emptySet()));
             final String schemaString = "{ \"type\": \"string\" }";
 
             mockDescribeAcls(aclBindings);
@@ -187,10 +188,8 @@ class IntegrationTest {
             final short replicationFactorTestCreated = 3;
             final Set<String> topicNames = Set.of(topicNameUserUpdated);
             final Set<AclBinding> aclBindings = getDomainAclBindings("de.volkerfaas.arc.", "User:129849");
-            final Map<String, TopicDescription> topicDescriptions = new HashMap<>();
-            topicDescriptions.putAll(getTopicDescription(topicNameUserUpdated, 5));
-            final Map<ConfigResource, Config> topicConfigs = new HashMap<>();
-            topicConfigs.putAll(getConfig(topicNameUserUpdated, Map.entry("cleanup.policy", "compact"), Map.entry("min.compaction.lag.ms", "100")));
+            final Map<String, TopicDescription> topicDescriptions = new HashMap<>(getTopicDescription(topicNameUserUpdated, 5));
+            final Map<ConfigResource, Config> topicConfigs = new HashMap<>(getConfig(topicNameUserUpdated, Set.of(Pair.with("cleanup.policy", "compact"), Pair.with("min.compaction.lag.ms", "100"))));
             final String schemaString = "{ \"type\": \"string\" }";
 
             mockDescribeAcls(aclBindings);
@@ -247,8 +246,8 @@ class IntegrationTest {
             topicDescriptions.putAll(getTopicDescription(topicNameUserUpdated, 5));
             topicDescriptions.putAll(getTopicDescription(topicNameTestCreated, 3));
             final Map<ConfigResource, Config> topicConfigs = new HashMap<>();
-            topicConfigs.putAll(getConfig(topicNameUserUpdated));
-            topicConfigs.putAll(getConfig(topicNameTestCreated));
+            topicConfigs.putAll(getConfig(topicNameUserUpdated, Collections.emptySet()));
+            topicConfigs.putAll(getConfig(topicNameTestCreated, Collections.emptySet()));
             final String schemaString = "{ \"type\": \"string\" }";
 
             mockDescribeAcls(aclBindings);
@@ -310,8 +309,8 @@ class IntegrationTest {
             topicDescriptions.putAll(getTopicDescription(topicNameUserUpdated, 5));
             topicDescriptions.putAll(getTopicDescription(topicNameTestCreated, 3));
             final Map<ConfigResource, Config> configs = new HashMap<>();
-            configs.putAll(getConfig(topicNameUserUpdated, Map.entry("cleanup.policy", "compact"), Map.entry("min.compaction.lag.ms", "100")));
-            configs.putAll(getConfig(topicNameTestCreated));
+            configs.putAll(getConfig(topicNameUserUpdated, Set.of(Pair.with("cleanup.policy", "compact"), Pair.with("min.compaction.lag.ms", "100"))));
+            configs.putAll(getConfig(topicNameTestCreated, Collections.emptySet()));
             final String schemaString = "{ \"type\": \"string\" }";
 
             mockDescribeAcls(aclBindings);
@@ -343,8 +342,8 @@ class IntegrationTest {
             topicDescriptions.putAll(getTopicDescription(topicNameUserUpdated, 5));
             topicDescriptions.putAll(getTopicDescription(topicNameTestCreated, 3));
             final Map<ConfigResource, Config> configs = new HashMap<>();
-            configs.putAll(getConfig(topicNameUserUpdated, Map.entry("cleanup.policy", "compact"), Map.entry("min.compaction.lag.ms", "100")));
-            configs.putAll(getConfig(topicNameTestCreated));
+            configs.putAll(getConfig(topicNameUserUpdated, Set.of(Pair.with("cleanup.policy", "compact"), Pair.with("min.compaction.lag.ms", "100"))));
+            configs.putAll(getConfig(topicNameTestCreated, Collections.emptySet()));
             final String schemaString = "{ \"type\": \"string\" }";
 
             mockDescribeAcls(aclBindings);
@@ -380,9 +379,9 @@ class IntegrationTest {
             topicDescriptions.putAll(getTopicDescription(topicNameTestCreated, 3));
             topicDescriptions.putAll(getTopicDescription(topicNameSoundPlayed, 20));
             final Map<ConfigResource, Config> configs = new HashMap<>();
-            configs.putAll(getConfig(topicNameUserUpdated, Map.entry("cleanup.policy", "compact"), Map.entry("min.compaction.lag.ms", "100")));
-            configs.putAll(getConfig(topicNameTestCreated));
-            configs.putAll(getConfig(topicNameSoundPlayed));
+            configs.putAll(getConfig(topicNameUserUpdated, Set.of(Pair.with("cleanup.policy", "compact"), Pair.with("min.compaction.lag.ms", "100"))));
+            configs.putAll(getConfig(topicNameTestCreated, Collections.emptySet()));
+            configs.putAll(getConfig(topicNameSoundPlayed, Collections.emptySet()));
             final String schemaString = "{ \"type\": \"string\" }";
 
             mockDescribeAcls(aclBindings);
@@ -462,9 +461,9 @@ class IntegrationTest {
         doReturn(describeClusterResult).when(adminClient).describeCluster();
     }
 
-    private Map<ConfigResource, Config> getConfig(String topicName, Map.Entry<String, String>... configEntries) {
+    private Map<ConfigResource, Config> getConfig(String topicName, Set<Pair<String, String>> configEntries) {
         ConfigResource resource = new ConfigResource(ConfigResource.Type.TOPIC, topicName);
-        Config kafkaConfig = new Config(Arrays.stream(configEntries)
+        Config kafkaConfig = new Config(configEntries.stream()
                 .map(ConfigEntries::createDynamicTopicConfigEntry)
                 .collect(Collectors.toSet()));
 
