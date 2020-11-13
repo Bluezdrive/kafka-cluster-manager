@@ -69,7 +69,6 @@ public class KafkaClusterManager implements ApplicationRunner {
             } else {
                 LOGGER.error("{}", e.getMessage());
             }
-            System.exit(1);
         }
     }
 
