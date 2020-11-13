@@ -1,5 +1,6 @@
 # Kafka Cluster Manager
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/af4e3d89b0a9459a9dd89789bab0ed38)](https://app.codacy.com/gh/Bluezdrive/kafka-cluster-manager?utm_source=github.com&utm_medium=referral&utm_content=Bluezdrive/kafka-cluster-manager&utm_campaign=Badge_Grade)
 [![Build Status](https://travis-ci.org/Bluezdrive/kafka-cluster-manager.svg?branch=master&service=github)](https://travis-ci.org/Bluezdrive/kafka-cluster-manager)
 [![Coverage Status](https://coveralls.io/repos/github/Bluezdrive/kafka-cluster-manager/badge.svg?branch=master)](https://coveralls.io/github/Bluezdrive/kafka-cluster-manager?branch=master)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/178f2aac0e9b4f69bdb0b9285be5397c)](https://app.codacy.com/gh/Bluezdrive/kafka-cluster-manager?utm_source=github.com&utm_medium=referral&utm_content=Bluezdrive/kafka-cluster-manager&utm_campaign=Badge_Grade_Settings)
