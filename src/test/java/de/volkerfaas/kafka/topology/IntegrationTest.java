@@ -337,7 +337,8 @@ class IntegrationTest {
             final Set<String> topicNames = Set.of(topicNameUserUpdated, topicNameTestCreated);
             final Set<AclBinding> aclBindings = getDomainAclBindings("de.volkerfaas.arc.", "User:129849");
             aclBindings.addAll(getDomainAclBindings("de.volkerfaas.test.", "User:138166"));
-            aclBindings.addAll(getConsumerAclBindings("de.volkerfaas.test.public.", "User:129849"));
+            final Set<AclBinding> consumerAclBindings = getConsumerAclBindings("de.volkerfaas.test.public.", "User:129849");
+            aclBindings.addAll(consumerAclBindings);
             aclBindings.addAll(getConsumerAclBindings("de.volkerfaas.arc.public.", "User:138166"));
             final Map<String, TopicDescription> topicDescriptions = new HashMap<>();
             topicDescriptions.putAll(getTopicDescription(topicNameUserUpdated, 5));
@@ -357,13 +358,62 @@ class IntegrationTest {
             final KafkaFuture<Void> kafkaFuture = mock(KafkaFuture.class);
             doReturn(null).when(kafkaFuture).get();
 
-            final Set<AclBindingFilter> expectedAclBindingFilters = getConsumerAclBindings("de.volkerfaas.test.public.", "User:129849").stream().map(AclBinding::toFilter).collect(Collectors.toSet());
+            final Set<AclBindingFilter> expectedAclBindingFilters = consumerAclBindings.stream().map(AclBinding::toFilter).collect(Collectors.toSet());
             final DeleteAclsResult deleteAclsResult = mock(DeleteAclsResult.class);
             doReturn(kafkaFuture).when(deleteAclsResult).all();
             doAnswer(invocation -> {
                 Collection<AclBindingFilter> filters = invocation.getArgument(0);
                 assertNotNull(filters);
                 assertEquals(3, filters.size());
+                assertThat(filters, containsInAnyOrder(expectedAclBindingFilters.toArray()));
+                return deleteAclsResult;
+            }).when(adminClient).deleteAcls(anyCollection());
+
+            kafkaClusterManager.buildTopology(topologyDirectory, Collections.emptyList());
+            verify(adminClient, never()).createTopics(any());
+            verify(adminClient, never()).createPartitions(any());
+            verify(adminClient, never()).createAcls(any());
+            verify(adminClient, never()).incrementalAlterConfigs(any());
+        }
+
+        @Test
+        void and_removing_domain_acl() throws InterruptedException, ExecutionException, IOException {
+            final String topicNameUserUpdated = "de.volkerfaas.arc.public.user_updated";
+            final String topicNameTestCreated = "de.volkerfaas.test.public.test_created";
+            final String topicNameSoundPlayed = "de.volkerfaas.music.public.sound_played";
+            final Set<String> topicNames = Set.of(topicNameUserUpdated, topicNameTestCreated, topicNameSoundPlayed);
+            final Set<AclBinding> aclBindings = getDomainAclBindings("de.volkerfaas.arc.", "User:129849");
+            aclBindings.addAll(getDomainAclBindings("de.volkerfaas.test.", "User:138166"));
+            aclBindings.addAll(getConsumerAclBindings("de.volkerfaas.arc.public.", "User:138166"));
+            final Set<AclBinding> domainAclBindings = getDomainAclBindings("de.volkerfaas.music.", "User:121739");
+            aclBindings.addAll(domainAclBindings);
+            final Map<String, TopicDescription> topicDescriptions = new HashMap<>();
+            topicDescriptions.putAll(getTopicDescription(topicNameUserUpdated, 5));
+            topicDescriptions.putAll(getTopicDescription(topicNameTestCreated, 3));
+            topicDescriptions.putAll(getTopicDescription(topicNameSoundPlayed, 20));
+            final Map<ConfigResource, Config> configs = new HashMap<>();
+            configs.putAll(getConfig(topicNameUserUpdated, Map.entry("cleanup.policy", "compact"), Map.entry("min.compaction.lag.ms", "100")));
+            configs.putAll(getConfig(topicNameTestCreated));
+            configs.putAll(getConfig(topicNameSoundPlayed));
+            final String schemaString = "{ \"type\": \"string\" }";
+
+            mockDescribeAcls(aclBindings);
+            mockDescribeCluster();
+            mockDescribeConfigs(configs);
+            mockDescribeTopics(topicNames, topicDescriptions);
+            mockListTopics(topicNames);
+            mockParseSchema(schemaString);
+
+            final KafkaFuture<Void> kafkaFuture = mock(KafkaFuture.class);
+            doReturn(null).when(kafkaFuture).get();
+
+            final Set<AclBindingFilter> expectedAclBindingFilters = domainAclBindings.stream().map(AclBinding::toFilter).collect(Collectors.toSet());
+            final DeleteAclsResult deleteAclsResult = mock(DeleteAclsResult.class);
+            doReturn(kafkaFuture).when(deleteAclsResult).all();
+            doAnswer(invocation -> {
+                Collection<AclBindingFilter> filters = invocation.getArgument(0);
+                assertNotNull(filters);
+                assertEquals(6, filters.size());
                 assertThat(filters, containsInAnyOrder(expectedAclBindingFilters.toArray()));
                 return deleteAclsResult;
             }).when(adminClient).deleteAcls(anyCollection());

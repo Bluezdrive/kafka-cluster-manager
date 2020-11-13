@@ -59,14 +59,11 @@ public class TopologyFileServiceImpl implements TopologyFileService {
 
     @Override
     public Set<TopologyFile> listTopologies(String directory, List<String> domainNames) {
-        final Set<TopologyFile> topologies = topologyFileRepository.listTopologyFiles(directory, domainNames).stream()
+        return topologyFileRepository.listTopologyFiles(directory, domainNames).stream()
                 .map(topologyFileRepository::readTopology)
                 .filter(Objects::nonNull)
                 .map(this::addAdditionalValues)
                 .collect(Collectors.toUnmodifiableSet());
-        LOGGER.debug("Topologies have been read from files: {}", topologies);
-
-        return topologies;
     }
 
     @Override

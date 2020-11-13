@@ -67,16 +67,14 @@ public class TopologyFileRepositoryImpl implements TopologyFileRepository {
 
     @Override
     public Set<String> listTopologyFiles(String directory, List<String> domainNames) {
-        try {
-            try(final Stream<Path> pathStream = Files.walk(Paths.get(directory), 1)) {
-                final Set<String> topologyFiles = pathStream
-                        .filter(file -> isTopologyFile(file, domainNames))
-                        .map(Path::toAbsolutePath)
-                        .map(Path::toString)
-                        .collect(Collectors.toSet());
-                LOGGER.debug("Topology files: {}", topologyFiles);
-                return topologyFiles;
-            }
+        try(final Stream<Path> pathStream = Files.walk(Paths.get(directory), 1)) {
+            final Set<String> topologyFiles = pathStream
+                    .filter(file -> isTopologyFile(file, domainNames))
+                    .map(Path::toAbsolutePath)
+                    .map(Path::toString)
+                    .collect(Collectors.toSet());
+            LOGGER.debug("Topology files: {}", topologyFiles);
+            return topologyFiles;
         } catch (IOException e) {
             LOGGER.error("Error listing directory '{}': ", directory, e);
             return Collections.emptySet();

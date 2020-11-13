@@ -111,6 +111,7 @@ public class KafkaClusterManager implements ApplicationRunner {
 
     void buildTopology(String directory, List<String> domainNames) throws InterruptedException, ExecutionException, IOException {
         Set<TopologyFile> topologies = topologyFileService.listTopologies(directory, domainNames);
+        LOGGER.debug("Topologies have been read from files: {}", topologies);
         if (topologyFileService.isTopologyValid(topologies)) {
             topologyFileService.updateTopology(topologies);
             documentationService.writeReadmeFile(topologies);
