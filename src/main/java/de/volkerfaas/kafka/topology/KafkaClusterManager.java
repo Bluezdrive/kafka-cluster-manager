@@ -41,23 +41,23 @@ public class KafkaClusterManager implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) {
-        String propertyFile = ApplicationArgumentsUtils.firstStringValueOf(args, "environment", null);
-        Properties properties = getProperties(propertyFile);
-        String directory = ApplicationArgumentsUtils.firstStringValueOf(args, "directory", "topology");
-        setTopologyDirectory(properties, directory);
-
-        boolean allowDelete = args.containsOption("allow-delete");
-        final List<String> domainNames = ApplicationArgumentsUtils.stringValuesOf(args, "domain");
-        setAllowDelete(properties, allowDelete, domainNames);
-
-        boolean dryRun = args.containsOption("dry-run");
-        properties.put(ApplicationConfiguration.PROPERTY_KEY_TOPOLOGY_DRY_RUN, dryRun);
-
-        PropertiesPropertySource propertySource = new PropertiesPropertySource("confluent-cloud-topology-builder", properties);
-        environment.getPropertySources().addFirst(propertySource);
-
-        boolean restore = args.containsOption("restore");
         try {
+            String propertyFile = ApplicationArgumentsUtils.firstStringValueOf(args, "environment", null);
+            Properties properties = getProperties(propertyFile);
+            String directory = ApplicationArgumentsUtils.firstStringValueOf(args, "directory", "topology");
+            setTopologyDirectory(properties, directory);
+
+            boolean allowDelete = args.containsOption("allow-delete");
+            final List<String> domainNames = ApplicationArgumentsUtils.stringValuesOf(args, "domain");
+            setAllowDelete(properties, allowDelete, domainNames);
+
+            boolean dryRun = args.containsOption("dry-run");
+            properties.put(ApplicationConfiguration.PROPERTY_KEY_TOPOLOGY_DRY_RUN, dryRun);
+
+            PropertiesPropertySource propertySource = new PropertiesPropertySource("confluent-cloud-topology-builder", properties);
+            environment.getPropertySources().addFirst(propertySource);
+
+            boolean restore = args.containsOption("restore");
             if (restore) {
                 restoreTopology(directory, domainNames);
             } else {
@@ -91,18 +91,11 @@ public class KafkaClusterManager implements ApplicationRunner {
         System.setProperty(ApplicationConfiguration.PROPERTY_KEY_TOPOLOGY_DIRECTORY, absolutePath);
     }
 
-    public Properties getProperties(String propertyFile) {
+    public Properties getProperties(String propertyFile) throws IOException {
         Properties properties = new Properties();
         if (Objects.nonNull(propertyFile)) {
             try (InputStream input = new FileInputStream(propertyFile)) {
                 properties.load(input);
-            } catch (IOException e) {
-                if (LOGGER.isDebugEnabled()) {
-                    LOGGER.error("", e);
-                } else {
-                    LOGGER.error("{}", e.getMessage());
-                }
-                System.exit(1);
             }
         }
         return properties;
