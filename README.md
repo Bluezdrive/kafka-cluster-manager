@@ -86,9 +86,9 @@ In order to access an Apache Kafka® cluster with the Kafka Cluster Manager, the
 
 ### 1.0
 
-* Create topics
-* Increase partitions
-* Alter Configuration of a topic
-* Restore topology of a domain from the cluster
-* Support for multiple environments
-* Remove orphaned access control list entries at visibility and topic level (do not use in production)
+*  Create topics
+*  Increase partitions
+*  Alter Configuration of a topic
+*  Restore topology of a domain from the cluster
+*  Support for multiple environments
+*  Remove orphaned access control list entries at visibility and topic level (do not use in production)

@@ -50,16 +50,6 @@ import static org.mockito.Mockito.*;
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 class IntegrationTest {
 
-    @TestConfiguration
-    public static class ContextConfiguration {
-
-        @Bean
-        public CacheManager cacheManager() {
-            return new ConcurrentMapCacheManager("cluster");
-        }
-
-    }
-
     @Autowired
     private CacheManager cacheManager;
 
@@ -76,6 +66,16 @@ class IntegrationTest {
     private SchemaRegistryClient schemaRegistryClient;
 
     private String topologyDirectory;
+
+    @TestConfiguration
+    public static class ContextConfiguration {
+
+        @Bean
+        public CacheManager cacheManager() {
+            return new ConcurrentMapCacheManager("cluster");
+        }
+
+    }
 
     @BeforeEach
     void init() {

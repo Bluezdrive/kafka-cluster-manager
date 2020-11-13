@@ -24,10 +24,10 @@ import java.util.regex.Pattern;
 @Repository
 public class SchemaRegistryRepositoryImpl implements SchemaRegistryRepository {
 
-    static final Logger LOGGER = LoggerFactory.getLogger(SchemaRegistryRepositoryImpl.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SchemaRegistryRepositoryImpl.class);
 
-    final Environment environment;
-    final SchemaRegistryClient schemaRegistryClient;
+    private final Environment environment;
+    private final SchemaRegistryClient schemaRegistryClient;
 
     @Autowired
     public SchemaRegistryRepositoryImpl(Environment environment, SchemaRegistryClient schemaRegistryClient) {
