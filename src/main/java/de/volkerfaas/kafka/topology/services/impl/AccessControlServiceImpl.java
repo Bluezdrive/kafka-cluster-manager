@@ -68,25 +68,25 @@ public class AccessControlServiceImpl implements AccessControlService {
         return orphanedAclBindings;
     }
 
-    AclBinding getAclBinding(ResourceType type, String name, String principal, AclOperation operation, boolean prefix) {
+    public AclBinding getAclBinding(ResourceType type, String name, String principal, AclOperation operation, boolean prefix) {
         ResourcePattern resourcePattern = new ResourcePattern(type, name, prefix ? PatternType.PREFIXED : PatternType.LITERAL);
         AccessControlEntry accessControlEntry = new AccessControlEntry(principal, "*", operation, AclPermissionType.ALLOW);
 
         return new AclBinding(resourcePattern, accessControlEntry);
     }
 
-    String getAclBindingFilterPrincipal(Set<AclBindingFilter> aclBindingFilters) {
+    public String getAclBindingFilterPrincipal(Set<AclBindingFilter> aclBindingFilters) {
         return aclBindingFilters.stream()
                 .map(aclBindingFilter -> aclBindingFilter.entryFilter().principal())
                 .findFirst()
                 .orElse(null);
     }
 
-    String getResourceName(ConsumerAccessControl consumerAccessControl, boolean prefix) {
+    public String getResourceName(ConsumerAccessControl consumerAccessControl, boolean prefix) {
         return consumerAccessControl.getFullName() + (prefix ? "." : "");
     }
 
-    boolean isAclBindingNotInDomains(AclBinding aclBinding, Set<String> domainNames) {
+    public boolean isAclBindingNotInDomains(AclBinding aclBinding, Set<String> domainNames) {
         final String principal = aclBinding.pattern().name();
         final Pattern pattern = Pattern.compile(ApplicationConfiguration.REGEX_DOMAIN + ".*");
         final Matcher matcher = pattern.matcher(principal);
@@ -99,11 +99,11 @@ public class AccessControlServiceImpl implements AccessControlService {
         }
     }
 
-    boolean isAclNotAvailable(Collection<AclBinding> aclBindings, AclBinding aclBinding) {
+    public boolean isAclNotAvailable(Collection<AclBinding> aclBindings, AclBinding aclBinding) {
         return aclBindings.stream().noneMatch(aclBinding::equals);
     }
 
-    Set<AclBindingFilter> listAclBindingFilters(String principal, ResourceType resourceType, AclOperation aclOperation) throws ExecutionException, InterruptedException {
+    public Set<AclBindingFilter> listAclBindingFilters(String principal, ResourceType resourceType, AclOperation aclOperation) throws ExecutionException, InterruptedException {
         if (Objects.isNull(principal)) {
             return Collections.emptySet();
         }
@@ -120,7 +120,7 @@ public class AccessControlServiceImpl implements AccessControlService {
                 .collect(Collectors.toSet());
     }
 
-    Set<AclBindingFilter> listAclBindingFiltersNotInDomains(List<Domain> domains) throws ExecutionException, InterruptedException {
+    public Set<AclBindingFilter> listAclBindingFiltersNotInDomains(List<Domain> domains) throws ExecutionException, InterruptedException {
         final KafkaCluster kafkaCluster = kafkaClusterRepository.dumpCluster();
         final List<AclBinding> aclBindings = kafkaCluster.getAclBindings();
         final Set<String> domainNames = domains.stream().map(Domain::getName).collect(Collectors.toSet());
@@ -135,7 +135,7 @@ public class AccessControlServiceImpl implements AccessControlService {
         return aclBindingFilters;
     }
 
-    Set<AclBinding> listAclBindingsByName(String name) throws ExecutionException, InterruptedException {
+    public Set<AclBinding> listAclBindingsByName(String name) throws ExecutionException, InterruptedException {
         if (Objects.isNull(name)) {
             return Collections.emptySet();
         }
@@ -148,7 +148,7 @@ public class AccessControlServiceImpl implements AccessControlService {
                 .collect(Collectors.toSet());
     }
 
-    Set<AclBinding> listAclBindingsForConsumer(String resourceName, String principal, boolean prefix) {
+    public Set<AclBinding> listAclBindingsForConsumer(String resourceName, String principal, boolean prefix) {
         final Set<AclBinding> consumerAclBindings = new HashSet<>();
         if (Strings.isNotBlank(principal)) {
             try {
@@ -173,7 +173,7 @@ public class AccessControlServiceImpl implements AccessControlService {
         return consumerAclBindings;
     }
 
-    Set<AclBinding> listAclBindingsForDomain(Domain domain) {
+    public Set<AclBinding> listAclBindingsForDomain(Domain domain) {
         final String resourceName = domain.getName() + ".";
         final String principal = domain.getPrincipal();
         final Set<AclBinding> domainAclBindings = new HashSet<>();
@@ -187,7 +187,7 @@ public class AccessControlServiceImpl implements AccessControlService {
         return domainAclBindings;
     }
 
-    Set<AclBinding> listAclBindingsForProducer(String resourceName, String principal) {
+    public Set<AclBinding> listAclBindingsForProducer(String resourceName, String principal) {
         final Set<AclBinding> producerAclBindings = new HashSet<>();
         if (Strings.isNotBlank(principal)) {
             try {
@@ -214,7 +214,7 @@ public class AccessControlServiceImpl implements AccessControlService {
         return producerAclBindings;
     }
 
-    Set<AclBinding> listAclBindingsForVisibilityOrTopic(ConsumerAccessControl consumerAccessControl, boolean prefix) {
+    public Set<AclBinding> listAclBindingsForVisibilityOrTopic(ConsumerAccessControl consumerAccessControl, boolean prefix) {
         String resourceName = getResourceName(consumerAccessControl, prefix);
         return consumerAccessControl.getConsumers().stream()
                 .map(consumer -> listAclBindingsForConsumer(resourceName, consumer.getPrincipal(), prefix))
@@ -222,13 +222,13 @@ public class AccessControlServiceImpl implements AccessControlService {
                 .collect(Collectors.toUnmodifiableSet());
     }
 
-    Set<String> listPrincipals(ConsumerAccessControl consumerAccessControl) {
+    public Set<String> listPrincipals(ConsumerAccessControl consumerAccessControl) {
         return consumerAccessControl.getConsumers().stream()
                 .map(AccessControl::getPrincipal)
                 .collect(Collectors.toSet());
     }
 
-    Set<AclBindingFilter> listOrphanedAclBindingFilters(Domain domain) {
+    public Set<AclBindingFilter> listOrphanedAclBindingFilters(Domain domain) {
         final String name = domain.getName() + ".";
         final String principal = domain.getPrincipal();
         try {
@@ -252,7 +252,7 @@ public class AccessControlServiceImpl implements AccessControlService {
         }
     }
 
-    Set<AclBindingFilter> listOrphanedAclBindingFilters(ConsumerAccessControl consumerAccessControl, boolean prefix) {
+    public Set<AclBindingFilter> listOrphanedAclBindingFilters(ConsumerAccessControl consumerAccessControl, boolean prefix) {
         final String name = consumerAccessControl.getFullName() + (prefix ? "." : "");
         final Set<String> principals = listPrincipals(consumerAccessControl);
         try {

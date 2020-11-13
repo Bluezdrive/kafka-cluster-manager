@@ -97,7 +97,7 @@ public class TopicServiceImpl implements TopicService {
         kafkaClusterRepository.updateConfigs(configs);
     }
 
-    NewTopic createNewTopic(Topic topic) {
+    public NewTopic createNewTopic(Topic topic) {
         final Map<String, String> config = topic.getConfig().entrySet().stream()
                 .collect(Collectors.toMap(ConfigEntries::getDottedLowerCase, Map.Entry::getValue));
 
@@ -105,7 +105,7 @@ public class TopicServiceImpl implements TopicService {
                 .configs(config);
     }
 
-    Map.Entry<String, NewPartitions> getNewPartitions(Topic topic, KafkaCluster kafkaCluster) {
+    public Map.Entry<String, NewPartitions> getNewPartitions(Topic topic, KafkaCluster kafkaCluster) {
         final KafkaTopic kafkaTopic = kafkaCluster.getTopics().stream()
                 .filter(t -> Objects.equals(t.getName(), topic.getFullName()))
                 .findFirst()
@@ -119,7 +119,7 @@ public class TopicServiceImpl implements TopicService {
         }
     }
 
-    Map.Entry<ConfigResource, Collection<AlterConfigOp>> listAlterConfigOpsByConfigResource(Topic topic, KafkaCluster kafkaCluster) {
+    public Map.Entry<ConfigResource, Collection<AlterConfigOp>> listAlterConfigOpsByConfigResource(Topic topic, KafkaCluster kafkaCluster) {
         final KafkaTopic kafkaTopic = kafkaCluster.getTopics().stream()
                 .filter(t -> Objects.equals(t.getName(), topic.getFullName()))
                 .findFirst()
@@ -137,7 +137,7 @@ public class TopicServiceImpl implements TopicService {
         return Map.entry(configResource, alterConfigOps);
     }
 
-    Set<AlterConfigOp> listConfigsToDelete(Topic topic, KafkaTopic kafkaTopic) {
+    public Set<AlterConfigOp> listConfigsToDelete(Topic topic, KafkaTopic kafkaTopic) {
         final Set<AlterConfigOp> alterConfigOps = new HashSet<>();
         final Map<String, String> config = kafkaTopic.getConfig();
         for (Map.Entry<String, String> entry : config.entrySet()) {
@@ -153,7 +153,7 @@ public class TopicServiceImpl implements TopicService {
         return alterConfigOps;
     }
 
-    Set<AlterConfigOp> listConfigsToSet(Topic topic, KafkaTopic kafkaTopic) {
+    public Set<AlterConfigOp> listConfigsToSet(Topic topic, KafkaTopic kafkaTopic) {
         final Set<AlterConfigOp> alterConfigOps = new HashSet<>();
         final Map<String, String> config = topic.getConfig();
         for (Map.Entry<String, String> entry : config.entrySet()) {
@@ -170,7 +170,7 @@ public class TopicServiceImpl implements TopicService {
         return alterConfigOps;
     }
 
-    boolean isTopicAvailable(Topic topic, Set<String> existingTopicNames) {
+    public boolean isTopicAvailable(Topic topic, Set<String> existingTopicNames) {
         return existingTopicNames.stream()
                 .anyMatch(item -> item.equals(topic.getFullName()));
     }

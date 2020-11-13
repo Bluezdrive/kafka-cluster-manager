@@ -34,7 +34,7 @@ public class DocumentationServiceImpl implements DocumentationService {
         LOGGER.info("Documentation in README.md has been updated");
     }
 
-    String buildDomainTable(Set<TopologyFile> topologies) {
+    public String buildDomainTable(Set<TopologyFile> topologies) {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append(new Heading("Domains", 1)).append("\n");
         Table.Builder tableBuilderDomains = new Table.Builder()
@@ -51,7 +51,7 @@ public class DocumentationServiceImpl implements DocumentationService {
         return stringBuilder.toString();
     }
 
-    String buildTopicsTable(Set<TopologyFile> topologies) {
+    public String buildTopicsTable(Set<TopologyFile> topologies) {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append(new Heading("Topics", 1)).append("\n");
         Table.Builder tableBuilderTopics = new Table.Builder()

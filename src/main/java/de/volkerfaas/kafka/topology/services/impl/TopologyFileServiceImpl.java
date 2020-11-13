@@ -128,7 +128,7 @@ public class TopologyFileServiceImpl implements TopologyFileService {
         }
     }
 
-    TopologyFile addAdditionalValues(TopologyFile topology) {
+    public TopologyFile addAdditionalValues(TopologyFile topology) {
         getDomainNameAndVisibilities(topology.getDomain()).stream()
                 .map(this::addAdditionalValuesToVisibility)
                 .map(this::getDomainNameAndVisibilityFullNameAndTopics)
@@ -138,7 +138,7 @@ public class TopologyFileServiceImpl implements TopologyFileService {
         return topology;
     }
 
-    Pair<String, Visibility> addAdditionalValuesToVisibility(Pair<String, Visibility> pair) {
+    public Pair<String, Visibility> addAdditionalValuesToVisibility(Pair<String, Visibility> pair) {
         final String domainName = pair.getValue0();
         final Visibility visibility = pair.getValue1();
         visibility.setPrefix(domainName + ".");
@@ -146,7 +146,7 @@ public class TopologyFileServiceImpl implements TopologyFileService {
         return pair;
     }
 
-    void addAdditionalValuesToTopic(Triplet<String, String, Topic> triplet) {
+    public void addAdditionalValuesToTopic(Triplet<String, String, Topic> triplet) {
         final String domainName = triplet.getValue0();
         final String visibilityFullName = triplet.getValue1();
         final Topic topic = triplet.getValue2();
@@ -157,7 +157,7 @@ public class TopologyFileServiceImpl implements TopologyFileService {
         }
     }
 
-    void addKafkaTopicToTopology(String pathname, List<String> domainNames, Set<TopologyFile> topologies, Collection<String> subjects, KafkaTopic kafkaTopic) {
+    public void addKafkaTopicToTopology(String pathname, List<String> domainNames, Set<TopologyFile> topologies, Collection<String> subjects, KafkaTopic kafkaTopic) {
         final Pattern pattern = Pattern.compile(ApplicationConfiguration.REGEX_FULL_TOPIC_NAME);
         final Matcher matcher = pattern.matcher(kafkaTopic.getName());
         if (matcher.matches() && matcher.groupCount() == 3 && domainNames.contains(matcher.group(1))) {
@@ -175,7 +175,7 @@ public class TopologyFileServiceImpl implements TopologyFileService {
         }
     }
 
-    TopologyFile createTopologyIfNotExists(final String pathname, final String domainName, final Set<TopologyFile> topologies) {
+    public TopologyFile createTopologyIfNotExists(final String pathname, final String domainName, final Set<TopologyFile> topologies) {
         TopologyFile topology = topologies.stream()
                 .filter(t -> isTopologyFileMatch(domainName, t))
                 .findFirst()
@@ -189,7 +189,7 @@ public class TopologyFileServiceImpl implements TopologyFileService {
         return topology;
     }
 
-    private boolean isTopologyFileMatch(String domainName, TopologyFile topology) {
+    public boolean isTopologyFileMatch(String domainName, TopologyFile topology) {
         final File file = topology.getFile();
         if (Objects.isNull(file)) {
             return false;
@@ -198,7 +198,7 @@ public class TopologyFileServiceImpl implements TopologyFileService {
         return Objects.equals(file.getName(), "topology-" + domainName + ".yaml");
     }
 
-    Domain createDomainIfNotExistsInTopology(final String domainName, final TopologyFile topology) {
+    public Domain createDomainIfNotExistsInTopology(final String domainName, final TopologyFile topology) {
         Domain domain = topology.getDomain();
         if (Objects.isNull(domain)) {
             domain = new Domain(domainName);
@@ -208,7 +208,7 @@ public class TopologyFileServiceImpl implements TopologyFileService {
         return domain;
     }
 
-    Visibility createVisibilityIfNotExistsInDomain(final String visibilityType, final Domain domain) {
+    public Visibility createVisibilityIfNotExistsInDomain(final String visibilityType, final Domain domain) {
         final Visibility.Type type = Visibility.Type.valueOf(visibilityType.toUpperCase());
         Visibility visibility = domain.getVisibilities().stream()
                 .filter(v -> Objects.equals(type, v.getType()))
@@ -223,32 +223,32 @@ public class TopologyFileServiceImpl implements TopologyFileService {
         return visibility;
     }
 
-    String getValueSchemaFilename(String domainName, Topic topic) {
+    public String getValueSchemaFilename(String domainName, Topic topic) {
         return ApplicationConfiguration.EVENTS_DIRECTORY
                 + "/" + domainName
                 + "/" + topic.getFullName()
                 + ApplicationConfiguration.SCHEMA_FILE_VALUE_SUFFIX;
     }
 
-    List<Triplet<String, String, Topic>> getDomainNameAndVisibilityFullNameAndTopics(Pair<String, Visibility> pair) {
+    public List<Triplet<String, String, Topic>> getDomainNameAndVisibilityFullNameAndTopics(Pair<String, Visibility> pair) {
         return pair.getValue1().getTopics().stream()
                 .map(topic -> Triplet.with(pair.getValue0(), pair.getValue1().getFullName(), topic))
                 .collect(Collectors.toUnmodifiableList());
     }
 
-    List<Pair<String, Visibility>> getDomainNameAndVisibilities(Domain domain) {
+    public List<Pair<String, Visibility>> getDomainNameAndVisibilities(Domain domain) {
         return domain.getVisibilities().stream()
                 .map(visibility -> Pair.with(domain.getName(), visibility))
                 .collect(Collectors.toUnmodifiableList());
     }
 
-    List<Domain> listDomains(Set<TopologyFile> topologies) {
+    public List<Domain> listDomains(Set<TopologyFile> topologies) {
         return topologies.stream()
                 .map(TopologyFile::getDomain)
                 .collect(Collectors.toUnmodifiableList());
     }
 
-    Set<TopologyFile> listTopologiesToBeRestored(String pathname, List<String> domainNames) throws ExecutionException, InterruptedException {
+    public Set<TopologyFile> listTopologiesToBeRestored(String pathname, List<String> domainNames) throws ExecutionException, InterruptedException {
         final Set<TopologyFile> topologies = new HashSet<>();
         final List<KafkaTopic> kafkaTopics = topicService.listTopicsInCluster();
         final Collection<String> subjects = schemaFileService.listSubjects();

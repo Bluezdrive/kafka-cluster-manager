@@ -81,7 +81,7 @@ public class TopologyFileRepositoryImpl implements TopologyFileRepository {
         }
     }
 
-    boolean isTopologyFile(Path file, List<String> domainNames) {
+    public boolean isTopologyFile(Path file, List<String> domainNames) {
         if (Files.isDirectory(file)) {
             return false;
         }

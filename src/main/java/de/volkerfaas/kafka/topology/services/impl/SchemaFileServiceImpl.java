@@ -65,7 +65,7 @@ public class SchemaFileServiceImpl implements SchemaFileService {
                 .collect(Collectors.toSet());
     }
 
-    Set<Path> addSchemaFiles(Topic topic) {
+    public Set<Path> addSchemaFiles(Topic topic) {
         Set<Path> schemaFiles = new HashSet<>();
         final String directory = environment.getRequiredProperty(ApplicationConfiguration.PROPERTY_KEY_TOPOLOGY_DIRECTORY);
         final String keySchemaFile = topic.getKeySchemaFile();

@@ -141,7 +141,7 @@ public class KafkaClusterRepositoryImpl implements KafkaClusterRepository {
         }
     }
 
-    short getReplicationFactor(TopicDescription topicDescription) {
+    public short getReplicationFactor(TopicDescription topicDescription) {
         return (short) topicDescription
                 .partitions()
                 .get(0)
@@ -150,15 +150,15 @@ public class KafkaClusterRepositoryImpl implements KafkaClusterRepository {
     }
 
 
-    boolean isDynamicTopicConfig(ConfigEntry configEntry) {
+    public boolean isDynamicTopicConfig(ConfigEntry configEntry) {
         return configEntry.source().equals(ConfigEntry.ConfigSource.DYNAMIC_TOPIC_CONFIG);
     }
 
-    boolean isNotDryRun() {
+    public boolean isNotDryRun() {
         return !environment.getRequiredProperty(ApplicationConfiguration.PROPERTY_KEY_TOPOLOGY_DRY_RUN, boolean.class);
     }
 
-    Set<String> listTopicNames() throws ExecutionException, InterruptedException {
+    public Set<String> listTopicNames() throws ExecutionException, InterruptedException {
         Set<String> topicNames = adminClient
                 .listTopics()
                 .names()
@@ -168,7 +168,7 @@ public class KafkaClusterRepositoryImpl implements KafkaClusterRepository {
         return topicNames;
     }
 
-    List<KafkaTopic> listTopicsByNames(Set<String> names) throws ExecutionException, InterruptedException {
+    public List<KafkaTopic> listTopicsByNames(Set<String> names) throws ExecutionException, InterruptedException {
         final Map<String, TopicDescription> topicDescriptions = adminClient.describeTopics(names).all().get();
         LOGGER.debug("Received topic descriptions from Apache Kafka® cluster: {}", topicDescriptions);
         final Map<String, Config> configs = listConfigsByNames(names);
@@ -187,7 +187,7 @@ public class KafkaClusterRepositoryImpl implements KafkaClusterRepository {
                 .collect(Collectors.toList());
     }
 
-    Map<String, Config> listConfigsByNames(Set<String> names) throws ExecutionException, InterruptedException {
+    public Map<String, Config> listConfigsByNames(Set<String> names) throws ExecutionException, InterruptedException {
         Set<ConfigResource> resources = names.stream()
                 .map(name -> new ConfigResource(ConfigResource.Type.TOPIC, name))
                 .collect(Collectors.toSet());

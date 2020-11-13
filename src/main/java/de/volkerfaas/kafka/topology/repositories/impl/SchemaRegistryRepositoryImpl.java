@@ -88,7 +88,7 @@ public class SchemaRegistryRepositoryImpl implements SchemaRegistryRepository {
         } else return null;
     }
 
-    String getContent(Path schemaFile) {
+    public String getContent(Path schemaFile) {
         try {
             final String schema = Files.readString(schemaFile);
             if (schema == null || schema.isEmpty() || schema.isBlank()) {
@@ -100,7 +100,7 @@ public class SchemaRegistryRepositoryImpl implements SchemaRegistryRepository {
         }
     }
 
-    String getSchemaSubject(Path schemaFile) {
+    public String getSchemaSubject(Path schemaFile) {
         String fileName = schemaFile.toString();
         final Pattern pattern = Pattern.compile(ApplicationConfiguration.REGEX_SCHEMA_PATH_RELATIVE);
         final Matcher matcher = pattern.matcher(fileName);
@@ -112,7 +112,7 @@ public class SchemaRegistryRepositoryImpl implements SchemaRegistryRepository {
         }
     }
 
-    void registerSchemaFile(Path schemaFile) {
+    public void registerSchemaFile(Path schemaFile) {
         final String subject = getSchemaSubject(schemaFile);
         final ParsedSchema parsedSchema = parseSchema(schemaFile);
         try {
@@ -139,7 +139,7 @@ public class SchemaRegistryRepositoryImpl implements SchemaRegistryRepository {
         }
     }
 
-    int getVersion(String subject, ParsedSchema parsedSchema) {
+    public int getVersion(String subject, ParsedSchema parsedSchema) {
         try {
             final List<Integer> allVersions = schemaRegistryClient.getAllVersions(subject);
             if (allVersions.isEmpty()) {
@@ -157,11 +157,11 @@ public class SchemaRegistryRepositoryImpl implements SchemaRegistryRepository {
         }
     }
 
-    boolean isNotDryRun() {
+    public boolean isNotDryRun() {
         return !environment.getRequiredProperty(ApplicationConfiguration.PROPERTY_KEY_TOPOLOGY_DRY_RUN, boolean.class);
     }
 
-    ParsedSchema parseSchema(Path schemaFile) {
+    public ParsedSchema parseSchema(Path schemaFile) {
         assert schemaFile != null;
 
         final String schema = getContent(schemaFile);

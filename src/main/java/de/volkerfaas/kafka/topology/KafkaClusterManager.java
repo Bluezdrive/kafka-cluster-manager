@@ -73,7 +73,7 @@ public class KafkaClusterManager implements ApplicationRunner {
         }
     }
 
-    void setAllowDelete(Properties properties, boolean allowDelete, List<String> domainNames) {
+    public void setAllowDelete(Properties properties, boolean allowDelete, List<String> domainNames) {
         if (domainNames.isEmpty()) {
             properties.put(ApplicationConfiguration.PROPERTY_KEY_TOPOLOGY_ALLOW_DELETE, allowDelete);
         } else {
@@ -81,7 +81,7 @@ public class KafkaClusterManager implements ApplicationRunner {
         }
     }
 
-    void setTopologyDirectory(Properties properties, String directory) {
+    public void setTopologyDirectory(Properties properties, String directory) {
         final File path = new File(directory).getAbsoluteFile();
         if (!path.exists() || !path.isDirectory()) {
             LOGGER.error("Directory {} doesn't exist.", directory);
@@ -92,7 +92,7 @@ public class KafkaClusterManager implements ApplicationRunner {
         System.setProperty(ApplicationConfiguration.PROPERTY_KEY_TOPOLOGY_DIRECTORY, absolutePath);
     }
 
-    Properties getProperties(String propertyFile) {
+    public Properties getProperties(String propertyFile) {
         Properties properties = new Properties();
         if (Objects.nonNull(propertyFile)) {
             try (InputStream input = new FileInputStream(propertyFile)) {
@@ -109,7 +109,7 @@ public class KafkaClusterManager implements ApplicationRunner {
         return properties;
     }
 
-    void buildTopology(String directory, List<String> domainNames) throws InterruptedException, ExecutionException, IOException {
+    public void buildTopology(String directory, List<String> domainNames) throws InterruptedException, ExecutionException, IOException {
         Set<TopologyFile> topologies = topologyFileService.listTopologies(directory, domainNames);
         LOGGER.debug("Topologies have been read from files: {}", topologies);
         if (topologyFileService.isTopologyValid(topologies)) {
@@ -118,7 +118,7 @@ public class KafkaClusterManager implements ApplicationRunner {
         }
     }
 
-    void restoreTopology(String directory, List<String> domainNames) throws ExecutionException, InterruptedException {
+    public void restoreTopology(String directory, List<String> domainNames) throws ExecutionException, InterruptedException {
         if (!domainNames.isEmpty()) {
             topologyFileService.restoreTopologies(directory, domainNames);
         } else {
