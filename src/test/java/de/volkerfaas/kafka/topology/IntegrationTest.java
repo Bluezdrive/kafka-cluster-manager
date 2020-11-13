@@ -14,7 +14,6 @@ import org.apache.kafka.common.resource.ResourceType;
 import org.javatuples.Pair;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -88,7 +87,7 @@ class IntegrationTest {
     @AfterEach
     void destroy() {
         Objects.requireNonNull(cacheManager.getCache("cluster")).clear();
-        Mockito.reset(adminClient, schemaRegistryClient);
+        reset(adminClient, schemaRegistryClient);
     }
 
     @Nested
