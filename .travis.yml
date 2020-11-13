@@ -6,7 +6,7 @@ branches:
   - master
 cache:
   directories:
-  - $home/.m2/repository
+    - $home/.m2/repository
 script: mvn clean package
 after_success:
   - mvn test jacoco:report coveralls:report -DrepoToken=${COVERALLS_REPO_TOKEN}
