@@ -9,7 +9,6 @@ import org.apache.kafka.common.resource.ResourceType;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.mockito.Mockito;
 
 import java.util.Collection;
 import java.util.List;
@@ -22,6 +21,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 class AccessControlServiceImplTest {
@@ -36,7 +36,7 @@ class AccessControlServiceImplTest {
 
     @BeforeEach
     void init() {
-        this.kafkaClusterRepository = Mockito.mock(KafkaClusterRepositoryImpl.class);
+        this.kafkaClusterRepository = mock(KafkaClusterRepositoryImpl.class);
         this.accessControlService = new AccessControlServiceImpl(kafkaClusterRepository);
     }
 

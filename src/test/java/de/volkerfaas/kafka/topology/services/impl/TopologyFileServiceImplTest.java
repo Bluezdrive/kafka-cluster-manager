@@ -9,7 +9,6 @@ import org.javatuples.Triplet;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.mockito.Mockito;
 import org.springframework.core.env.Environment;
 
 import javax.validation.Validator;
@@ -21,8 +20,6 @@ import java.util.concurrent.ExecutionException;
 import static org.hamcrest.CoreMatchers.hasItems;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
@@ -42,12 +39,12 @@ class TopologyFileServiceImplTest {
         this.topologyFile = new File(resource.getPath());
         this.topologyDirectory = topologyFile.getParent();
 
-        AccessControlService accessControlService = Mockito.mock(AccessControlService.class);
-        this.topicService = Mockito.mock(TopicServiceImpl.class);
-        this.topologyFileRepository = Mockito.mock(TopologyFileRepository.class);
-        Validator validator = Mockito.mock(Validator.class);
-        Environment environment = Mockito.mock(Environment.class);
-        this.schemaFileService = Mockito.mock(SchemaFileServiceImpl.class);
+        AccessControlService accessControlService = mock(AccessControlService.class);
+        this.topicService = mock(TopicServiceImpl.class);
+        this.topologyFileRepository = mock(TopologyFileRepository.class);
+        Validator validator = mock(Validator.class);
+        Environment environment = mock(Environment.class);
+        this.schemaFileService = mock(SchemaFileServiceImpl.class);
         this.topologyFileService = new TopologyFileServiceImpl(environment, topicService, accessControlService, schemaFileService, topologyFileRepository, validator);
     }
 

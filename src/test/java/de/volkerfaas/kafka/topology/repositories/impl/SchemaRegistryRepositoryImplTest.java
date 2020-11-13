@@ -9,7 +9,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.MockedStatic;
-import org.mockito.Mockito;
 import org.mockito.stubbing.Answer;
 import org.springframework.core.env.Environment;
 
@@ -23,7 +22,7 @@ import java.nio.file.StandardOpenOption;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.*;
 
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 class SchemaRegistryRepositoryImplTest {
@@ -41,8 +40,8 @@ class SchemaRegistryRepositoryImplTest {
         assertNotNull(topologyResource);
         final File topologyFile = new File(topologyResource.getPath());
         this.topologyDirectory = topologyFile.getParent();
-        this.environment = Mockito.mock(Environment.class);
-        this.schemaRegistryClient = Mockito.mock(SchemaRegistryClient.class);
+        this.environment = mock(Environment.class);
+        this.schemaRegistryClient = mock(SchemaRegistryClient.class);
         this.schemaRegistryRepository = new SchemaRegistryRepositoryImpl(environment, schemaRegistryClient);
         final URL schemaResource = this.getClass()
                 .getClassLoader()
@@ -84,7 +83,7 @@ class SchemaRegistryRepositoryImplTest {
         @NullAndEmptySource
         @ValueSource(strings = {" "})
         void must_throw_an_exception_in_case_the_file_contains_nothing(String content) {
-            try (MockedStatic<Files> filesMock = Mockito.mockStatic(Files.class)) {
+            try (MockedStatic<Files> filesMock = mockStatic(Files.class)) {
                 filesMock.when(() -> Files.readString(any(Path.class))).thenReturn(content);
                 final Path path = Path.of(schemaFilePath);
                 Exception exception = assertThrows(IllegalStateException.class, () -> schemaRegistryRepository.getContent(path));
@@ -105,7 +104,7 @@ class SchemaRegistryRepositoryImplTest {
             SchemaMetadata schemaMetadata = new SchemaMetadata(10000, 1, schema);
             doReturn(topologyDirectory).when(environment).getRequiredProperty(ApplicationConfiguration.PROPERTY_KEY_TOPOLOGY_DIRECTORY);
             doReturn(schemaMetadata).when(schemaRegistryClient).getLatestSchemaMetadata(eq(subject));
-            try (MockedStatic<Files> filesMock = Mockito.mockStatic(Files.class)) {
+            try (MockedStatic<Files> filesMock = mockStatic(Files.class)) {
                 filesMock.when(() -> Files.createDirectories(any(Path.class))).thenAnswer((Answer<Path>) invocation -> (Path) invocation.getArguments()[0]);
                 filesMock.when(() -> Files.writeString(any(Path.class), eq(schema), eq(StandardOpenOption.CREATE), eq(StandardOpenOption.TRUNCATE_EXISTING))).thenAnswer((Answer<Path>) invocation -> {
                     final Path pathToWrite = (Path) invocation.getArguments()[0];

@@ -9,15 +9,13 @@ import org.apache.kafka.clients.admin.NewPartitions;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.common.config.ConfigResource;
 import org.junit.jupiter.api.*;
-import org.mockito.Mockito;
 
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anySet;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.*;
 
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 class TopicServiceImplTest {
@@ -27,7 +25,7 @@ class TopicServiceImplTest {
 
     @BeforeEach
     void init() {
-        this.kafkaClusterRepository = Mockito.mock(KafkaClusterRepository.class);
+        this.kafkaClusterRepository = mock(KafkaClusterRepository.class);
         this.topicService = new TopicServiceImpl(kafkaClusterRepository);
     }
 

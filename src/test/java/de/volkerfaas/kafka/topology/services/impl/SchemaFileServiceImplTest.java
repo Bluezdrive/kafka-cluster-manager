@@ -7,7 +7,6 @@ import de.volkerfaas.kafka.topology.model.TopologyFile;
 import de.volkerfaas.kafka.topology.model.Visibility;
 import de.volkerfaas.kafka.topology.repositories.SchemaRegistryRepository;
 import org.junit.jupiter.api.*;
-import org.mockito.Mockito;
 import org.springframework.core.env.Environment;
 
 import java.io.File;
@@ -22,6 +21,7 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 class SchemaFileServiceImplTest {
@@ -31,8 +31,8 @@ class SchemaFileServiceImplTest {
 
     @BeforeEach
     void init() {
-        Environment environment = Mockito.mock(Environment.class);
-        SchemaRegistryRepository schemaRegistryRepository = Mockito.mock(SchemaRegistryRepository.class);
+        Environment environment = mock(Environment.class);
+        SchemaRegistryRepository schemaRegistryRepository = mock(SchemaRegistryRepository.class);
         this.schemaFileService = new SchemaFileServiceImpl(environment, schemaRegistryRepository);
         final URL resource = getClass().getClassLoader().getResource("topology-de.volkerfaas.arc.yaml");
         assertNotNull(resource);
