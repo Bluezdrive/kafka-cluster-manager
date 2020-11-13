@@ -13,10 +13,6 @@ public class TopologyFile {
     private File file;
     private Domain domain;
 
-    public TopologyFile() {
-
-    }
-
     @NotNull
     @JsonIgnore
     public File getFile() {

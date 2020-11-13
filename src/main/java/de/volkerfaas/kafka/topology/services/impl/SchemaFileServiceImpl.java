@@ -27,7 +27,6 @@ public class SchemaFileServiceImpl implements SchemaFileService {
         this.schemaRegistryRepository = schemaRegistryRepository;
     }
 
-
     @Override
     public String downloadSchemaFile(String schemaFile) {
         return schemaRegistryRepository.downloadSchemaFile(schemaFile);

@@ -10,10 +10,6 @@ public class AccessControl {
 
     private String principal;
 
-    public AccessControl() {
-
-    }
-
     public AccessControl(String principal) {
         this.principal = principal;
     }
