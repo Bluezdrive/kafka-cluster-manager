@@ -11,8 +11,6 @@ import org.apache.kafka.common.config.ConfigResource;
 import org.apache.kafka.common.resource.PatternType;
 import org.apache.kafka.common.resource.ResourcePattern;
 import org.apache.kafka.common.resource.ResourceType;
-import org.hamcrest.Matcher;
-import org.hamcrest.collection.IsMapContaining;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
@@ -37,6 +35,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static de.volkerfaas.kafka.topology.utils.Matchers.hasEntryWithIterableValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.is;
@@ -355,19 +354,8 @@ class IntegrationTest {
             mockListTopics(topicNames);
             mockParseSchema(schemaString);
 
-            final KafkaFuture<Void> kafkaFuture = mock(KafkaFuture.class);
-            doReturn(null).when(kafkaFuture).get();
-
             final Set<AclBindingFilter> expectedAclBindingFilters = consumerAclBindings.stream().map(AclBinding::toFilter).collect(Collectors.toSet());
-            final DeleteAclsResult deleteAclsResult = mock(DeleteAclsResult.class);
-            doReturn(kafkaFuture).when(deleteAclsResult).all();
-            doAnswer(invocation -> {
-                Collection<AclBindingFilter> filters = invocation.getArgument(0);
-                assertNotNull(filters);
-                assertEquals(3, filters.size());
-                assertThat(filters, containsInAnyOrder(expectedAclBindingFilters.toArray()));
-                return deleteAclsResult;
-            }).when(adminClient).deleteAcls(anyCollection());
+            mockDeleteAcls(3, expectedAclBindingFilters);
 
             kafkaClusterManager.buildTopology(topologyDirectory, Collections.emptyList());
             verify(adminClient, never()).createTopics(any());
@@ -404,19 +392,8 @@ class IntegrationTest {
             mockListTopics(topicNames);
             mockParseSchema(schemaString);
 
-            final KafkaFuture<Void> kafkaFuture = mock(KafkaFuture.class);
-            doReturn(null).when(kafkaFuture).get();
-
             final Set<AclBindingFilter> expectedAclBindingFilters = domainAclBindings.stream().map(AclBinding::toFilter).collect(Collectors.toSet());
-            final DeleteAclsResult deleteAclsResult = mock(DeleteAclsResult.class);
-            doReturn(kafkaFuture).when(deleteAclsResult).all();
-            doAnswer(invocation -> {
-                Collection<AclBindingFilter> filters = invocation.getArgument(0);
-                assertNotNull(filters);
-                assertEquals(6, filters.size());
-                assertThat(filters, containsInAnyOrder(expectedAclBindingFilters.toArray()));
-                return deleteAclsResult;
-            }).when(adminClient).deleteAcls(anyCollection());
+            mockDeleteAcls(6, expectedAclBindingFilters);
 
             kafkaClusterManager.buildTopology(topologyDirectory, Collections.emptyList());
             verify(adminClient, never()).createTopics(any());
@@ -427,8 +404,18 @@ class IntegrationTest {
 
     }
 
-    public static <K, V> Matcher<Map<? extends K,? extends Collection<? extends V>>> hasEntryWithIterableValue(Matcher<K> key, Matcher<Iterable<? extends V>> value) {
-        return IsMapContaining.hasEntry(key, value);
+    private void mockDeleteAcls(int expectedSize, Set<AclBindingFilter> expectedAclBindingFilters) throws InterruptedException, ExecutionException {
+        final KafkaFuture<Void> kafkaFuture = mock(KafkaFuture.class);
+        doReturn(null).when(kafkaFuture).get();
+        final DeleteAclsResult deleteAclsResult = mock(DeleteAclsResult.class);
+        doReturn(kafkaFuture).when(deleteAclsResult).all();
+        doAnswer(invocation -> {
+            Collection<AclBindingFilter> filters = invocation.getArgument(0);
+            assertNotNull(filters);
+            assertEquals(expectedSize, filters.size());
+            assertThat(filters, containsInAnyOrder(expectedAclBindingFilters.toArray()));
+            return deleteAclsResult;
+        }).when(adminClient).deleteAcls(anyCollection());
     }
 
     private void mockParseSchema(String schemaString) {
