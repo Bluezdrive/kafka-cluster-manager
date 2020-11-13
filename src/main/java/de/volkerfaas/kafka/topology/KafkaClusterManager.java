@@ -83,8 +83,7 @@ public class KafkaClusterManager implements ApplicationRunner {
     public void setTopologyDirectory(Properties properties, String directory) {
         final File path = new File(directory).getAbsoluteFile();
         if (!path.exists() || !path.isDirectory()) {
-            LOGGER.error("Directory {} doesn't exist.", directory);
-            System.exit(1);
+            throw new IllegalStateException("Directory '" + directory + "' doesn't exist.");
         }
         String absolutePath = path.getAbsolutePath();
         properties.put(ApplicationConfiguration.PROPERTY_KEY_TOPOLOGY_DIRECTORY, absolutePath);
