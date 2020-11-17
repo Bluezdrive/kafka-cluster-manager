@@ -1,0 +1,22 @@
+kafka:
+  bootstrap-servers: ${BOOTSTRAP_SERVER}
+  ssl.endpoint.identification.algorithm: https
+  sasl.mechanism: PLAIN
+  request.timeout.ms: 20000
+  security.protocol: SASL_SSL
+  retry.backoff.ms: 500
+  sasl.jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule   required username='${CLUSTER_API_KEY}'   password='${CLUSTER_API_SECRET}';
+schema.registry:
+  url: ${SCHEMA_REGISTRY_URL}
+  basic.auth.credentials.source: USER_INFO
+  basic.auth.user.info: ${SCHEMA_REGISTRY_API_KEY}:${SCHEMA_REGISTRY_API_SECRET}
+logging:
+  pattern:
+    console: "%clr(${LOG_LEVEL_PATTERN:%5p}) %m%n"
+  level:
+    root: info
+    org.apache.kafka: error
+    de.volkerfaas.kafka: debug
+spring:
+  main:
+    banner-mode: off

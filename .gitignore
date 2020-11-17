@@ -1,0 +1,9 @@
+/.idea/
+/*.iml
+/target/
+/topology
+**/.DS_Store
+/*.env
+/*.versionsBackup
+/*.yaml
+/*.properties
