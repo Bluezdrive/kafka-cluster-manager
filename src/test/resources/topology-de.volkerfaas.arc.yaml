@@ -1,0 +1,21 @@
+domain:
+  name: "de.volkerfaas.arc"
+  description: "Test domain for architecture stuff"
+  principal: "User:129849"
+  maintainer:
+    name: "Volker Faas"
+    email: "bluezdrive@volkerfaas.de"
+  visibilities:
+    - type: "public"
+      consumers:
+        - principal: "User:138166"
+      topics:
+        - name: "user_updated"
+          description: "Dummy topic for architecture stuff."
+          clusters: ['test']
+          numPartitions: 5
+          replicationFactor: 3
+          valueSchemaFile: "events/de.volkerfaas.arc/de.volkerfaas.arc.public.user_updated-value.avsc"
+          config:
+            minCompactionLagMs: "100"
+            cleanupPolicy: "compact"

@@ -1,0 +1,16 @@
+domain:
+  name: "de.volkerfaas.test"
+  description: "Test domain for architecture stuff"
+  principal: "User:138166"
+  maintainer:
+    name: "Volker Faas"
+    email: "bluezdrive@volkerfaas.de"
+  visibilities:
+    - type: "public"
+      topics:
+        - name: "test_created"
+          description: "Dummy topic for architecture stuff."
+          clusters: ['test']
+          numPartitions: 3
+          replicationFactor: 3
+          valueSchemaFile: "events/de.volkerfaas.test/de.volkerfaas.test.public.test_created-value.avsc"
