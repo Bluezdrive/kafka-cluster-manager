@@ -10,6 +10,8 @@ schema.registry:
   url: ${SCHEMA_REGISTRY_URL}
   basic.auth.credentials.source: USER_INFO
   basic.auth.user.info: ${SCHEMA_REGISTRY_API_KEY}:${SCHEMA_REGISTRY_API_SECRET}
+documentation:
+  filename: topology.md
 logging:
   pattern:
     console: "%clr(${LOG_LEVEL_PATTERN:%5p}) %m%n"

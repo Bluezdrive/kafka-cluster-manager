@@ -39,11 +39,13 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
-@SpringBootTest
+@SpringBootTest(properties = {"documentation.filename=topology.md"})
 @ContextConfiguration(loader= AnnotationConfigContextLoader.class)
 @ExtendWith(SpringExtension.class)
 @DisplayName("The kafka topology manager")
 class BuildTopologyIntegrationTest {
+
+    private static String ENVIRONMENT = "test";
 
     @Autowired
     private CacheManager cacheManager;
@@ -131,7 +133,7 @@ class BuildTopologyIntegrationTest {
             mockListConsumerGroups(adminClient, Collections.emptyList());
             mockDescribeConsumerGroups(adminClient, Collections.emptyMap());
 
-            kafkaClusterManager.buildTopology(topologyDirectory, Collections.emptyList(), false, false);
+            kafkaClusterManager.buildTopology(topologyDirectory, ENVIRONMENT, Collections.emptyList(), false, false);
             verify(adminClient, never()).createTopics(any());
             verify(adminClient, never()).createPartitions(any());
             verify(adminClient, never()).createAcls(any());
@@ -184,7 +186,7 @@ class BuildTopologyIntegrationTest {
                 return createPartitionsResult;
             }).when(adminClient).createPartitions(anyMap());
 
-            kafkaClusterManager.buildTopology(topologyDirectory, Collections.emptyList(), false, false);
+            kafkaClusterManager.buildTopology(topologyDirectory, ENVIRONMENT, Collections.emptyList(), false, false);
             verify(adminClient, never()).createTopics(any());
             verify(adminClient, never()).createAcls(any());
             verify(adminClient, never()).deleteAcls(any());
@@ -241,7 +243,7 @@ class BuildTopologyIntegrationTest {
                 return createTopicsResult;
             }).when(adminClient).createTopics(anySet());
 
-            kafkaClusterManager.buildTopology(topologyDirectory, Collections.emptyList(), false, false);
+            kafkaClusterManager.buildTopology(topologyDirectory, ENVIRONMENT, Collections.emptyList(), false, false);
             verify(adminClient, never()).createPartitions(any());
             verify(adminClient, never()).deleteAcls(any());
             verify(adminClient, never()).incrementalAlterConfigs(any());
@@ -287,7 +289,7 @@ class BuildTopologyIntegrationTest {
                     .when(adminClient)
                     .incrementalAlterConfigs(anyMap());
 
-            kafkaClusterManager.buildTopology(topologyDirectory, Collections.emptyList(), false, false);
+            kafkaClusterManager.buildTopology(topologyDirectory, ENVIRONMENT, Collections.emptyList(), false, false);
             verify(adminClient, never()).createTopics(any());
             verify(adminClient, never()).createPartitions(any());
             verify(adminClient, never()).createAcls(any());
@@ -352,7 +354,7 @@ class BuildTopologyIntegrationTest {
             mockListConsumerGroups(adminClient, Collections.emptyList());
             mockDescribeConsumerGroups(adminClient, Collections.emptyMap());
 
-            kafkaClusterManager.buildTopology(topologyDirectory, Collections.emptyList(), true, false);
+            kafkaClusterManager.buildTopology(topologyDirectory, ENVIRONMENT, Collections.emptyList(), true, false);
             verify(adminClient, never()).createTopics(any());
             verify(adminClient, never()).createPartitions(any());
             verify(adminClient, never()).createAcls(any());
@@ -398,7 +400,7 @@ class BuildTopologyIntegrationTest {
             final Set<AclBindingFilter> expectedAclBindingFilters = consumerAclBindings.stream().map(AclBinding::toFilter).collect(Collectors.toSet());
             mockDeleteAcls(adminClient, expectedAclBindingFilters);
 
-            kafkaClusterManager.buildTopology(topologyDirectory, Collections.emptyList(), true, false);
+            kafkaClusterManager.buildTopology(topologyDirectory, ENVIRONMENT, Collections.emptyList(), true, false);
             verify(adminClient, never()).createTopics(any());
             verify(adminClient, never()).createPartitions(any());
             verify(adminClient, never()).createAcls(any());
@@ -446,7 +448,7 @@ class BuildTopologyIntegrationTest {
             final Set<AclBindingFilter> expectedAclBindingFilters = domainAclBindings.stream().map(AclBinding::toFilter).collect(Collectors.toSet());
             mockDeleteAcls(adminClient, expectedAclBindingFilters);
 
-            kafkaClusterManager.buildTopology(topologyDirectory, Collections.emptyList(), true, false);
+            kafkaClusterManager.buildTopology(topologyDirectory, ENVIRONMENT, Collections.emptyList(), true, false);
             verify(adminClient, never()).createTopics(any());
             verify(adminClient, never()).createPartitions(any());
             verify(adminClient, never()).createAcls(any());
@@ -502,7 +504,7 @@ class BuildTopologyIntegrationTest {
             mockListConsumerGroups(adminClient, Collections.emptyList());
             mockDescribeConsumerGroups(adminClient, Collections.emptyMap());
 
-            kafkaClusterManager.buildTopology(topologyDirectory, Collections.emptyList(), false, true);
+            kafkaClusterManager.buildTopology(topologyDirectory, ENVIRONMENT, Collections.emptyList(), false, true);
             verify(adminClient, never()).createTopics(any());
             verify(adminClient, never()).createPartitions(any());
             verify(adminClient, never()).createAcls(any());
@@ -547,7 +549,7 @@ class BuildTopologyIntegrationTest {
             mockDescribeConsumerGroups(adminClient, Collections.emptyMap());
             mockDeleteTopics(adminClient, Set.of(topicNameSoundPlayed));
 
-            kafkaClusterManager.buildTopology(topologyDirectory, Collections.emptyList(), false, true);
+            kafkaClusterManager.buildTopology(topologyDirectory, ENVIRONMENT, Collections.emptyList(), false, true);
             verify(adminClient, never()).createTopics(any());
             verify(adminClient, never()).createPartitions(any());
             verify(adminClient, never()).createAcls(any());

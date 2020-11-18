@@ -6,7 +6,6 @@ import de.volkerfaas.kafka.cluster.repositories.impl.KafkaClusterRepositoryImpl;
 import de.volkerfaas.kafka.topology.ApplicationConfiguration;
 import de.volkerfaas.kafka.topology.model.Domain;
 import de.volkerfaas.kafka.topology.model.Topic;
-import de.volkerfaas.kafka.topology.model.TopologyFile;
 import de.volkerfaas.kafka.topology.model.Visibility;
 import org.apache.kafka.clients.admin.AlterConfigOp;
 import org.apache.kafka.clients.admin.ConfigEntry;
@@ -22,6 +21,8 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.*;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
@@ -46,32 +47,11 @@ class TopicServiceImplTest {
 
         @Test
         @DisplayName("should not create a new topic if it already exists in cluster")
-        void testNothing() throws ExecutionException, InterruptedException {
-            final String topicName = "de.volkerfaas.arc.public.user_updated";
-            final ClusterConfiguration clusterConfiguration = new ClusterConfiguration("lkc-p5zy2");
-            final TopicConfiguration topicConfiguration = new TopicConfiguration(topicName, Collections.emptyList(), (short) 3, Collections.emptyMap());
-            clusterConfiguration.getTopics().add(topicConfiguration);
-            clusterConfiguration.listTopicNames().add(topicName);
-            doReturn(clusterConfiguration).when(kafkaClusterRepository).getClusterConfiguration();
+        void testNotCreateNewTopic() throws ExecutionException, InterruptedException {
+            final String fullTopicName = "de.volkerfaas.arc.public.user_updated";
+            mockTestClusterConfiguration(fullTopicName, 4, Collections.emptyMap());
 
-            final TopologyFile topology = new TopologyFile();
-
-            final Domain domain = new Domain();
-            domain.setName("de.volkerfaas.arc");
-            topology.setDomain(domain);
-
-            final Visibility visibility = new Visibility();
-            visibility.setType(Visibility.Type.PUBLIC);
-            visibility.setPrefix("de.volkerfaas.arc.");
-            domain.getVisibilities().add(visibility);
-
-            final Topic topic = new Topic();
-            topic.setName("user_updated");
-            topic.setNumPartitions(4);
-            topic.setReplicationFactor((short) 2);
-            topic.setPrefix("de.volkerfaas.arc.public.");
-            visibility.getTopics().add(topic);
-
+            final Domain domain = createTestDomain(4, Collections.emptyMap());
             final Set<NewTopic> newTopics = topicService.createNewTopics(List.of(domain));
             assertNotNull(newTopics);
             assertEquals(0, newTopics.size());
@@ -83,24 +63,7 @@ class TopicServiceImplTest {
             final ClusterConfiguration clusterConfiguration = new ClusterConfiguration("lkc-p5zy2");
             doReturn(clusterConfiguration).when(kafkaClusterRepository).getClusterConfiguration();
 
-            final TopologyFile topology = new TopologyFile();
-
-            final Domain domain = new Domain();
-            domain.setName("de.volkerfaas.arc");
-            topology.setDomain(domain);
-
-            final Visibility visibility = new Visibility();
-            visibility.setType(Visibility.Type.PUBLIC);
-            visibility.setPrefix("de.volkerfaas.arc.");
-            domain.getVisibilities().add(visibility);
-
-            final Topic topic = new Topic();
-            topic.setName("user_updated");
-            topic.setNumPartitions(4);
-            topic.setReplicationFactor((short) 2);
-            topic.setPrefix("de.volkerfaas.arc.public.");
-            visibility.getTopics().add(topic);
-
+            final Domain domain = createTestDomain(4, Collections.emptyMap());
             final Set<NewTopic> newTopics = topicService.createNewTopics(List.of(domain));
             assertNotNull(newTopics);
             assertEquals(1, newTopics.size());
@@ -118,30 +81,10 @@ class TopicServiceImplTest {
         @Test
         @DisplayName("should not create a new partition if number of partitions in topology is greater than in cluster")
         void testCreateNewPartition() throws ExecutionException, InterruptedException {
-            final ClusterConfiguration clusterConfiguration = new ClusterConfiguration("lkc-p5zy2");
             final String fullTopicName = "de.volkerfaas.arc.public.user_updated";
-            final List<PartitionConfiguration> partitions = List.of(new PartitionConfiguration(fullTopicName, 0), new PartitionConfiguration(fullTopicName, 1), new PartitionConfiguration(fullTopicName, 2), new PartitionConfiguration(fullTopicName, 3));
-            clusterConfiguration.getTopics().add(new TopicConfiguration(fullTopicName, partitions, (short) 3, Collections.emptyMap()));
-            doReturn(clusterConfiguration).when(kafkaClusterRepository).getClusterConfiguration();
+            mockTestClusterConfiguration(fullTopicName, 4, Collections.emptyMap());
 
-            final TopologyFile topology = new TopologyFile();
-
-            final Domain domain = new Domain();
-            domain.setName("de.volkerfaas.arc");
-            topology.setDomain(domain);
-
-            final Visibility visibility = new Visibility();
-            visibility.setType(Visibility.Type.PUBLIC);
-            visibility.setPrefix("de.volkerfaas.arc.");
-            domain.getVisibilities().add(visibility);
-
-            final Topic topic = new Topic();
-            topic.setName("user_updated");
-            topic.setNumPartitions(5);
-            topic.setReplicationFactor((short) 2);
-            topic.setPrefix("de.volkerfaas.arc.public.");
-            visibility.getTopics().add(topic);
-
+            final Domain domain = createTestDomain(5, Collections.emptyMap());
             final Map<String, NewPartitions> newPartitionsByTopic = topicService.createNewPartitions(List.of(domain));
             assertNotNull(newPartitionsByTopic);
             assertEquals(1, newPartitionsByTopic.size());
@@ -155,30 +98,10 @@ class TopicServiceImplTest {
         @Test
         @DisplayName("should not create a new partition if number of partitions in topology is equal with cluster")
         void testNotCreateNewPartitionWhenEqual() throws ExecutionException, InterruptedException {
-            final ClusterConfiguration clusterConfiguration = new ClusterConfiguration("lkc-p5zy2");
             final String fullTopicName = "de.volkerfaas.arc.public.user_updated";
-            final List<PartitionConfiguration> partitions = List.of(new PartitionConfiguration(fullTopicName, 0), new PartitionConfiguration(fullTopicName, 1), new PartitionConfiguration(fullTopicName, 2), new PartitionConfiguration(fullTopicName, 3));
-            clusterConfiguration.getTopics().add(new TopicConfiguration(fullTopicName, partitions, (short) 3, Collections.emptyMap()));
-            doReturn(clusterConfiguration).when(kafkaClusterRepository).getClusterConfiguration();
+            mockTestClusterConfiguration(fullTopicName, 4, Collections.emptyMap());
 
-            final TopologyFile topology = new TopologyFile();
-
-            final Domain domain = new Domain();
-            domain.setName("de.volkerfaas.arc");
-            topology.setDomain(domain);
-
-            final Visibility visibility = new Visibility();
-            visibility.setType(Visibility.Type.PUBLIC);
-            visibility.setPrefix("de.volkerfaas.arc.");
-            domain.getVisibilities().add(visibility);
-
-            final Topic topic = new Topic();
-            topic.setName("user_updated");
-            topic.setNumPartitions(4);
-            topic.setReplicationFactor((short) 2);
-            topic.setPrefix("de.volkerfaas.arc.public.");
-            visibility.getTopics().add(topic);
-
+            final Domain domain = createTestDomain(4, Collections.emptyMap());
             final Map<String, NewPartitions> newPartitionsByTopic = topicService.createNewPartitions(List.of(domain));
             assertNotNull(newPartitionsByTopic);
             assertEquals(0, newPartitionsByTopic.size());
@@ -187,34 +110,15 @@ class TopicServiceImplTest {
 
         @Test
         @DisplayName("should not create a new partition if number of partitions in topology is less than cluster")
-        void testNotCreateNewPartitionWhenLess() throws ExecutionException, InterruptedException {
-            final ClusterConfiguration clusterConfiguration = new ClusterConfiguration("lkc-p5zy2");
+        void testNotCreateNewPartitionWhenLess() {
             final String fullTopicName = "de.volkerfaas.arc.public.user_updated";
-            final List<PartitionConfiguration> partitions = List.of(new PartitionConfiguration(fullTopicName, 0), new PartitionConfiguration(fullTopicName, 1), new PartitionConfiguration(fullTopicName, 2), new PartitionConfiguration(fullTopicName, 3));
-            clusterConfiguration.getTopics().add(new TopicConfiguration(fullTopicName, partitions, (short) 3, Collections.emptyMap()));
-            doReturn(clusterConfiguration).when(kafkaClusterRepository).getClusterConfiguration();
+            mockTestClusterConfiguration(fullTopicName, 4, Collections.emptyMap());
 
-            final TopologyFile topology = new TopologyFile();
-
-            final Domain domain = new Domain();
-            domain.setName("de.volkerfaas.arc");
-            topology.setDomain(domain);
-
-            final Visibility visibility = new Visibility();
-            visibility.setType(Visibility.Type.PUBLIC);
-            visibility.setPrefix("de.volkerfaas.arc.");
-            domain.getVisibilities().add(visibility);
-
-            final Topic topic = new Topic();
-            topic.setName("user_updated");
-            topic.setNumPartitions(3);
-            topic.setReplicationFactor((short) 2);
-            topic.setPrefix("de.volkerfaas.arc.public.");
-            visibility.getTopics().add(topic);
-
-            final Exception exception = assertThrows(IllegalArgumentException.class, () -> topicService.createNewPartitions(List.of(domain)));
+            final Domain domain = createTestDomain(3, Collections.emptyMap());
+            final Exception exception = assertThrows(Exception.class, () -> topicService.createNewPartitions(List.of(domain)));
             assertNotNull(exception);
-            assertEquals("Topic '" + topic.getFullName() + "' has smaller partitions size than in cluster.", exception.getMessage());
+            assertEquals(IllegalArgumentException.class, exception.getClass());
+            assertEquals("Topic '" + fullTopicName + "' has smaller partitions size than in cluster.", exception.getMessage());
         }
 
     }
@@ -248,32 +152,13 @@ class TopicServiceImplTest {
         @Test
         @DisplayName("should create new config entries if not available in cluster")
         void testCreateNewAlterConfigOperations() throws ExecutionException, InterruptedException {
-            final ClusterConfiguration clusterConfiguration = new ClusterConfiguration("lkc-p5zy2");
             final String fullTopicName = "de.volkerfaas.arc.public.user_updated";
-            final List<PartitionConfiguration> partitions = List.of(new PartitionConfiguration(fullTopicName, 0), new PartitionConfiguration(fullTopicName, 1), new PartitionConfiguration(fullTopicName, 2), new PartitionConfiguration(fullTopicName, 3));
-            clusterConfiguration.getTopics().add(new TopicConfiguration(fullTopicName, partitions, (short) 3, Collections.emptyMap()));
-            doReturn(clusterConfiguration).when(kafkaClusterRepository).getClusterConfiguration();
+            mockTestClusterConfiguration(fullTopicName, 4, Collections.emptyMap());
 
-            final TopologyFile topology = new TopologyFile();
-
-            final Domain domain = new Domain();
-            domain.setName("de.volkerfaas.arc");
-            topology.setDomain(domain);
-
-            final Visibility visibility = new Visibility();
-            visibility.setType(Visibility.Type.PUBLIC);
-            visibility.setPrefix("de.volkerfaas.arc.");
-            domain.getVisibilities().add(visibility);
-
-            final Topic topic = new Topic();
-            topic.setName("user_updated");
-            topic.setNumPartitions(4);
-            topic.setReplicationFactor((short) 2);
-            topic.setPrefix("de.volkerfaas.arc.public.");
-            topic.getConfig().put("cleanupPolicy", "compact");
-            visibility.getTopics().add(topic);
-
-            final ConfigResource configResource = new ConfigResource(ConfigResource.Type.TOPIC, topic.getFullName());
+            final Map<String, String> newConfig = new HashMap<>();
+            newConfig.put("cleanupPolicy", "compact");
+            final Domain domain = createTestDomain(4, newConfig);
+            final ConfigResource configResource = new ConfigResource(ConfigResource.Type.TOPIC, fullTopicName);
             final Map<ConfigResource, Collection<AlterConfigOp>> configs = topicService.createAlterConfigOperations(List.of(domain));
             assertNotNull(configs);
             assertTrue(configs.containsKey(configResource));
@@ -292,34 +177,15 @@ class TopicServiceImplTest {
         @Test
         @DisplayName("should update config entry if changed")
         void testUpdateAlterConfigOperations() throws ExecutionException, InterruptedException {
-            final ClusterConfiguration clusterConfiguration = new ClusterConfiguration("lkc-p5zy2");
             final String fullTopicName = "de.volkerfaas.arc.public.user_updated";
-            final List<PartitionConfiguration> partitions = List.of(new PartitionConfiguration(fullTopicName, 0), new PartitionConfiguration(fullTopicName, 1), new PartitionConfiguration(fullTopicName, 2), new PartitionConfiguration(fullTopicName, 3));
             final Map<String, String> config = new HashMap<>();
             config.put("cleanupPolicy", "delete");
-            clusterConfiguration.getTopics().add(new TopicConfiguration(fullTopicName, partitions, (short) 3, config));
-            doReturn(clusterConfiguration).when(kafkaClusterRepository).getClusterConfiguration();
+            mockTestClusterConfiguration(fullTopicName, 4, config);
 
-            final TopologyFile topology = new TopologyFile();
-
-            final Domain domain = new Domain();
-            domain.setName("de.volkerfaas.arc");
-            topology.setDomain(domain);
-
-            final Visibility visibility = new Visibility();
-            visibility.setType(Visibility.Type.PUBLIC);
-            visibility.setPrefix("de.volkerfaas.arc.");
-            domain.getVisibilities().add(visibility);
-
-            final Topic topic = new Topic();
-            topic.setName("user_updated");
-            topic.setNumPartitions(4);
-            topic.setReplicationFactor((short) 2);
-            topic.setPrefix("de.volkerfaas.arc.public.");
-            topic.getConfig().put("cleanupPolicy", "compact");
-            visibility.getTopics().add(topic);
-
-            final ConfigResource configResource = new ConfigResource(ConfigResource.Type.TOPIC, topic.getFullName());
+            final Map<String, String> alteredConfig = new HashMap<>();
+            alteredConfig.put("cleanupPolicy", "compact");
+            final Domain domain = createTestDomain(4, alteredConfig);
+            final ConfigResource configResource = new ConfigResource(ConfigResource.Type.TOPIC, fullTopicName);
             final Map<ConfigResource, Collection<AlterConfigOp>> configs = topicService.createAlterConfigOperations(List.of(domain));
             assertNotNull(configs);
             assertTrue(configs.containsKey(configResource));
@@ -338,34 +204,13 @@ class TopicServiceImplTest {
         @Test
         @DisplayName("should not update config entry if nothing changed")
         void testNotAlterConfigOperationsEqual() throws ExecutionException, InterruptedException {
-            final ClusterConfiguration clusterConfiguration = new ClusterConfiguration("lkc-p5zy2");
             final String fullTopicName = "de.volkerfaas.arc.public.user_updated";
-            final List<PartitionConfiguration> partitions = List.of(new PartitionConfiguration(fullTopicName, 0), new PartitionConfiguration(fullTopicName, 1), new PartitionConfiguration(fullTopicName, 2), new PartitionConfiguration(fullTopicName, 3));
             final Map<String, String> config = new HashMap<>();
             config.put("cleanupPolicy", "compact");
-            clusterConfiguration.getTopics().add(new TopicConfiguration(fullTopicName, partitions, (short) 3, config));
-            doReturn(clusterConfiguration).when(kafkaClusterRepository).getClusterConfiguration();
+            mockTestClusterConfiguration(fullTopicName, 4, config);
 
-            final TopologyFile topology = new TopologyFile();
-
-            final Domain domain = new Domain();
-            domain.setName("de.volkerfaas.arc");
-            topology.setDomain(domain);
-
-            final Visibility visibility = new Visibility();
-            visibility.setType(Visibility.Type.PUBLIC);
-            visibility.setPrefix("de.volkerfaas.arc.");
-            domain.getVisibilities().add(visibility);
-
-            final Topic topic = new Topic();
-            topic.setName("user_updated");
-            topic.setNumPartitions(4);
-            topic.setReplicationFactor((short) 2);
-            topic.setPrefix("de.volkerfaas.arc.public.");
-            topic.getConfig().put("cleanupPolicy", "compact");
-            visibility.getTopics().add(topic);
-
-            final ConfigResource configResource = new ConfigResource(ConfigResource.Type.TOPIC, topic.getFullName());
+            final Domain domain = createTestDomain(4, config);
+            final ConfigResource configResource = new ConfigResource(ConfigResource.Type.TOPIC, fullTopicName);
             final Map<ConfigResource, Collection<AlterConfigOp>> configs = topicService.createAlterConfigOperations(List.of(domain));
             assertNotNull(configs);
             assertFalse(configs.containsKey(configResource));
@@ -374,29 +219,13 @@ class TopicServiceImplTest {
         @Test
         @DisplayName("should not update config entry if topic not exists")
         void testNotAlterConfigOperationsTopicMissing() throws ExecutionException, InterruptedException {
-            final ClusterConfiguration clusterConfiguration = new ClusterConfiguration("lkc-p5zy2");
-            doReturn(clusterConfiguration).when(kafkaClusterRepository).getClusterConfiguration();
+            final String fullTopicName = "de.volkerfaas.arc.public.user_updated";
+            mockEmptyClusterConfiguration();
 
-            final TopologyFile topology = new TopologyFile();
-
-            final Domain domain = new Domain();
-            domain.setName("de.volkerfaas.arc");
-            topology.setDomain(domain);
-
-            final Visibility visibility = new Visibility();
-            visibility.setType(Visibility.Type.PUBLIC);
-            visibility.setPrefix("de.volkerfaas.arc.");
-            domain.getVisibilities().add(visibility);
-
-            final Topic topic = new Topic();
-            topic.setName("user_updated");
-            topic.setNumPartitions(4);
-            topic.setReplicationFactor((short) 2);
-            topic.setPrefix("de.volkerfaas.arc.public.");
-            topic.getConfig().put("cleanupPolicy", "compact");
-            visibility.getTopics().add(topic);
-
-            final ConfigResource configResource = new ConfigResource(ConfigResource.Type.TOPIC, topic.getFullName());
+            Map<String, String> config = new HashMap<>();
+            config.put("cleanupPolicy", "compact");
+            final Domain domain = createTestDomain(4, config);
+            final ConfigResource configResource = new ConfigResource(ConfigResource.Type.TOPIC, fullTopicName);
             final Map<ConfigResource, Collection<AlterConfigOp>> configs = topicService.createAlterConfigOperations(List.of(domain));
             assertNotNull(configs);
             assertFalse(configs.containsKey(configResource));
@@ -405,33 +234,13 @@ class TopicServiceImplTest {
         @Test
         @DisplayName("should delete config entry if not exists in topology")
         void testDeleteAlterConfigOperations() throws ExecutionException, InterruptedException {
-            final ClusterConfiguration clusterConfiguration = new ClusterConfiguration("lkc-p5zy2");
             final String fullTopicName = "de.volkerfaas.arc.public.user_updated";
-            final List<PartitionConfiguration> partitions = List.of(new PartitionConfiguration(fullTopicName, 0), new PartitionConfiguration(fullTopicName, 1), new PartitionConfiguration(fullTopicName, 2), new PartitionConfiguration(fullTopicName, 3));
             final Map<String, String> config = new HashMap<>();
             config.put("cleanupPolicy", "compact");
-            clusterConfiguration.getTopics().add(new TopicConfiguration(fullTopicName, partitions, (short) 3, config));
-            doReturn(clusterConfiguration).when(kafkaClusterRepository).getClusterConfiguration();
+            mockTestClusterConfiguration(fullTopicName, 4, config);
 
-            final TopologyFile topology = new TopologyFile();
-
-            final Domain domain = new Domain();
-            domain.setName("de.volkerfaas.arc");
-            topology.setDomain(domain);
-
-            final Visibility visibility = new Visibility();
-            visibility.setType(Visibility.Type.PUBLIC);
-            visibility.setPrefix("de.volkerfaas.arc.");
-            domain.getVisibilities().add(visibility);
-
-            final Topic topic = new Topic();
-            topic.setName("user_updated");
-            topic.setNumPartitions(4);
-            topic.setReplicationFactor((short) 2);
-            topic.setPrefix("de.volkerfaas.arc.public.");
-            visibility.getTopics().add(topic);
-
-            final ConfigResource configResource = new ConfigResource(ConfigResource.Type.TOPIC, topic.getFullName());
+            final Domain domain = createTestDomain(4, Collections.emptyMap());
+            final ConfigResource configResource = new ConfigResource(ConfigResource.Type.TOPIC, fullTopicName);
             final Map<ConfigResource, Collection<AlterConfigOp>> configs = topicService.createAlterConfigOperations(List.of(domain));
             assertNotNull(configs);
             assertTrue(configs.containsKey(configResource));
@@ -486,12 +295,10 @@ class TopicServiceImplTest {
         @Test
         @DisplayName("should return a list of topics available in cluster")
         void testListTopicsInCluster() throws ExecutionException, InterruptedException {
-            final ClusterConfiguration clusterConfiguration = new ClusterConfiguration("lkc-p5zy2");
             final String fullTopicName = "de.volkerfaas.arc.public.user_updated";
-            final List<PartitionConfiguration> partitions = List.of(new PartitionConfiguration(fullTopicName, 0), new PartitionConfiguration(fullTopicName, 1), new PartitionConfiguration(fullTopicName, 2), new PartitionConfiguration(fullTopicName, 3));
-            final TopicConfiguration topicConfiguration = new TopicConfiguration(fullTopicName, partitions, (short) 3, Collections.emptyMap());
-            clusterConfiguration.getTopics().add(topicConfiguration);
-            doReturn(clusterConfiguration).when(kafkaClusterRepository).getClusterConfiguration();
+            ClusterConfiguration clusterConfiguration = mockTestClusterConfiguration(fullTopicName, 4, Collections.emptyMap());
+            assertNotNull(clusterConfiguration);
+            final TopicConfiguration topicConfiguration = clusterConfiguration.getTopics().stream().findFirst().orElse(null);
 
             final Collection<TopicConfiguration> topicConfigurations = topicService.listTopicsInCluster();
             assertNotNull(topicConfigurations);
@@ -502,8 +309,7 @@ class TopicServiceImplTest {
         @Test
         @DisplayName("should return an empty list if no topics available in cluster")
         void testEmptyListTopicsInClusterNoTopics() throws ExecutionException, InterruptedException {
-            final ClusterConfiguration clusterConfiguration = new ClusterConfiguration("lkc-p5zy2");
-            doReturn(clusterConfiguration).when(kafkaClusterRepository).getClusterConfiguration();
+            mockEmptyClusterConfiguration();
 
             final Collection<TopicConfiguration> topicConfigurations = topicService.listTopicsInCluster();
             assertNotNull(topicConfigurations);
@@ -541,21 +347,7 @@ class TopicServiceImplTest {
             doReturn(clusterConfiguration).when(kafkaClusterRepository).getClusterConfiguration();
             doNothing().when(kafkaClusterRepository).deleteTopics(anyCollection());
 
-            final Domain domain = new Domain();
-            domain.setName("de.volkerfaas.arc");
-
-            final Visibility visibility = new Visibility();
-            visibility.setType(Visibility.Type.PUBLIC);
-            visibility.setPrefix("de.volkerfaas.arc.");
-            domain.getVisibilities().add(visibility);
-
-            final Topic topic = new Topic();
-            topic.setName("user_updated");
-            topic.setNumPartitions(4);
-            topic.setReplicationFactor((short) 3);
-            topic.setPrefix("de.volkerfaas.arc.public.");
-            visibility.getTopics().add(topic);
-
+            final Domain domain = createTestDomain(4, Collections.emptyMap());
             final Set<String> orphanedTopics = topicService.listOrphanedTopics(List.of(domain));
             assertNotNull(orphanedTopics);
             assertEquals(1, orphanedTopics.size());
@@ -565,29 +357,11 @@ class TopicServiceImplTest {
         @Test
         @DisplayName("should return no orphaned topics if topology equals cluster")
         void testEmptyListOrphanedTopicsEqual() throws ExecutionException, InterruptedException {
-            final ClusterConfiguration clusterConfiguration = new ClusterConfiguration("lkc-p5zy2");
             final String fullTopicName = "de.volkerfaas.arc.public.user_updated";
-            final List<PartitionConfiguration> partitions = List.of(new PartitionConfiguration(fullTopicName, 0), new PartitionConfiguration(fullTopicName, 1), new PartitionConfiguration(fullTopicName, 2), new PartitionConfiguration(fullTopicName, 3));
-            final TopicConfiguration topicConfigurationUserUpdated = new TopicConfiguration(fullTopicName, partitions, (short) 3, Collections.emptyMap());
-            clusterConfiguration.getTopics().add(topicConfigurationUserUpdated);
-            doReturn(clusterConfiguration).when(kafkaClusterRepository).getClusterConfiguration();
+            mockTestClusterConfiguration(fullTopicName, 4, Collections.emptyMap());
             doNothing().when(kafkaClusterRepository).deleteTopics(anyCollection());
 
-            final Domain domain = new Domain();
-            domain.setName("de.volkerfaas.arc");
-
-            final Visibility visibility = new Visibility();
-            visibility.setType(Visibility.Type.PUBLIC);
-            visibility.setPrefix("de.volkerfaas.arc.");
-            domain.getVisibilities().add(visibility);
-
-            final Topic topic = new Topic();
-            topic.setName("user_updated");
-            topic.setNumPartitions(4);
-            topic.setReplicationFactor((short) 3);
-            topic.setPrefix("de.volkerfaas.arc.public.");
-            visibility.getTopics().add(topic);
-
+            final Domain domain = createTestDomain(4, Collections.emptyMap());
             final Set<String> orphanedTopics = topicService.listOrphanedTopics(List.of(domain));
             assertNotNull(orphanedTopics);
             assertEquals(0, orphanedTopics.size());
@@ -596,25 +370,10 @@ class TopicServiceImplTest {
         @Test
         @DisplayName("should return no orphaned topics if topology has more topics than cluster")
         void testEmptyListOrphanedTopicsMore() throws ExecutionException, InterruptedException {
-            final ClusterConfiguration clusterConfiguration = new ClusterConfiguration("lkc-p5zy2");
-            doReturn(clusterConfiguration).when(kafkaClusterRepository).getClusterConfiguration();
+            mockEmptyClusterConfiguration();
             doNothing().when(kafkaClusterRepository).deleteTopics(anyCollection());
 
-            final Domain domain = new Domain();
-            domain.setName("de.volkerfaas.arc");
-
-            final Visibility visibility = new Visibility();
-            visibility.setType(Visibility.Type.PUBLIC);
-            visibility.setPrefix("de.volkerfaas.arc.");
-            domain.getVisibilities().add(visibility);
-
-            final Topic topic = new Topic();
-            topic.setName("user_updated");
-            topic.setNumPartitions(4);
-            topic.setReplicationFactor((short) 3);
-            topic.setPrefix("de.volkerfaas.arc.public.");
-            visibility.getTopics().add(topic);
-
+            final Domain domain = createTestDomain(4, Collections.emptyMap());
             final Set<String> orphanedTopics = topicService.listOrphanedTopics(List.of(domain));
             assertNotNull(orphanedTopics);
             assertEquals(0, orphanedTopics.size());
@@ -704,6 +463,48 @@ class TopicServiceImplTest {
 
         }
 
+    }
+
+    private ClusterConfiguration mockEmptyClusterConfiguration() {
+        final ClusterConfiguration clusterConfiguration = new ClusterConfiguration("lkc-p5zy2");
+        try {
+            doReturn(clusterConfiguration).when(kafkaClusterRepository).getClusterConfiguration();
+        } catch (InterruptedException | ExecutionException e) {
+            return null;
+        }
+
+        return clusterConfiguration;
+    }
+
+    private ClusterConfiguration mockTestClusterConfiguration(String fullTopicName, int numPartitions, Map<String, String> config) {
+        final ClusterConfiguration clusterConfiguration = new ClusterConfiguration("lkc-p5zy2");
+        final List<PartitionConfiguration> partitions = IntStream.range(0, numPartitions)
+                .mapToObj(index -> new PartitionConfiguration(fullTopicName, index))
+                .collect(Collectors.toList());
+        clusterConfiguration.getTopics().add(new TopicConfiguration(fullTopicName, partitions, (short) 3, config));
+        clusterConfiguration.listTopicNames().add(fullTopicName);
+        try {
+            doReturn(clusterConfiguration).when(kafkaClusterRepository).getClusterConfiguration();
+        } catch (InterruptedException | ExecutionException e) {
+           return null;
+        }
+
+        return clusterConfiguration;
+    }
+
+    private Domain createTestDomain(int numPartitions, Map<String, String> config) {
+        final Domain domain = new Domain();
+        domain.setName("de.volkerfaas.arc");
+
+        final Visibility visibility = new Visibility(Visibility.Type.PUBLIC);
+        visibility.setPrefix("de.volkerfaas.arc.");
+        domain.getVisibilities().add(visibility);
+
+        final Topic topic = new Topic("user_updated", numPartitions, (short) 3, config);
+        topic.setPrefix("de.volkerfaas.arc.public.");
+        visibility.getTopics().add(topic);
+
+        return domain;
     }
 
 }

@@ -12,6 +12,7 @@ domain:
       topics:
         - name: "user_updated"
           description: "Dummy topic for architecture stuff."
+          clusters: ['test']
           numPartitions: 5
           replicationFactor: 3
           valueSchemaFile: "events/de.volkerfaas.arc/de.volkerfaas.arc.public.user_updated-value.avsc"

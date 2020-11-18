@@ -15,7 +15,10 @@ public class ClusterConfiguration {
     private final Collection<ConsumerGroupConfiguration> consumerGroups;
 
     public ClusterConfiguration(String clusterId) {
-        this(clusterId, new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
+        this.aclBindings = new ArrayList<>();
+        this.clusterId = clusterId;
+        this.topics = new ArrayList<>();
+        this.consumerGroups = new ArrayList<>();
     }
 
     public ClusterConfiguration(String clusterId, List<TopicConfiguration> topics, List<AclBinding> aclBindings, Collection<ConsumerGroupConfiguration> consumerGroups) {

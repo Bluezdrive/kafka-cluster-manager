@@ -25,10 +25,12 @@ public class Topic implements ConsumerAccessControl {
     private String keySchemaFile;
     private String valueSchemaFile;
     private final Map<String, String> config;
+    private final List<String> clusters;
 
     public Topic() {
         this.consumers = new ArrayList<>();
         this.config = new HashMap<>();
+        this.clusters = new ArrayList<>();
     }
 
     public Topic(String name, int numPartitions, short replicationFactor, Map<String, String> config) {
@@ -132,6 +134,10 @@ public class Topic implements ConsumerAccessControl {
         return schemaFiles;
     }
 
+    public List<String> getClusters() {
+        return clusters;
+    }
+
     @Override
     public String toString() {
         return "Topic{" +
@@ -143,6 +149,7 @@ public class Topic implements ConsumerAccessControl {
                 "replicationFactor=" + replicationFactor + "," +
                 "keySchemaFile=" + keySchemaFile + "," +
                 "valueSchemaFile=" + valueSchemaFile + "," +
+                "environments=" + clusters + "," +
                 "config=" + config +
                 '}';
     }

@@ -65,6 +65,16 @@ public class TopologyFileServiceImpl implements TopologyFileService {
     }
 
     @Override
+    public void skipTopicsNotInEnvironment(Collection<TopologyFile> topologies, String environment) {
+        topologies.stream()
+                .map(TopologyFile::getDomain)
+                .filter(Objects::nonNull)
+                .map(Domain::getVisibilities)
+                .flatMap(List::stream)
+                .forEach(visibility -> visibility.getTopics().removeIf(topic -> !topic.getClusters().contains(environment)));
+    }
+
+    @Override
     public Set<TopologyFile> restoreTopologies(String directory, List<String> domainNames) throws ExecutionException, InterruptedException {
         final Set<TopologyFile> topologies = listTopologiesToBeRestored(directory, domainNames);
         topologies.stream()
@@ -122,6 +132,7 @@ public class TopologyFileServiceImpl implements TopologyFileService {
         final HibernateValidatorFactory validatorFactory = this.validator.unwrap(HibernateValidatorFactory.class);
         final Validator hibernateValidator = validatorFactory.usingContext().constraintValidatorPayload(validatorPayload).getValidator();
         final Set<ConstraintViolation<TopologyFile>> violations = topologies.stream()
+                .peek(topology -> LOGGER.info("Validating topology '{}'", topology.getFile()))
                 .map((Function<TopologyFile, Set<ConstraintViolation<TopologyFile>>>) hibernateValidator::validate)
                 .flatMap(Set::stream)
                 .collect(Collectors.toUnmodifiableSet());

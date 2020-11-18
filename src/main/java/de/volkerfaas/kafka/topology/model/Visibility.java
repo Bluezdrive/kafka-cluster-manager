@@ -44,6 +44,11 @@ public class Visibility implements ConsumerAccessControl {
         this.topics = new ArrayList<>();
     }
 
+    public Visibility(Type type) {
+        this();
+        this.type = type;
+    }
+
     @JsonIgnore
     public String getPrefix() {
         return prefix;

@@ -20,6 +20,7 @@ public class Application {
             System.out.println("  --help                     Show help.");
             System.out.println("  --directory=[directory]    Set base directory for topology files. Default is \"topology\".");
             System.out.println("  --domain=[domain]          Processes only a single domain");
+            System.out.println("  --cluster=[cluster]        Sets the cluster to deploy to or to restore from");
             System.out.println("  --allow-delete-acl         Allow deletion of orphaned ACLs. Cannot be used in combination with flag --domain. (DO NOT USE IN PRODUCTION!)");
             System.out.println("  --allow-delete-topics      Allow deletion of orphaned topics. Cannot be used in combination with flag --domain. (DO NOT USE IN PRODUCTION!)");
             System.out.println("  --dry-run                  Makes no changes to the remote topology");

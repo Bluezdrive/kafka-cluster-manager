@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
 
 import static org.hamcrest.CoreMatchers.hasItems;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -464,6 +465,106 @@ class TopologyFileServiceImplTest {
             ));
         }
 
+    }
+
+    @Nested
+    @DisplayName("the method skipTopicsNotInEnvironment")
+    class SkipTopicsNotInEnvironment {
+
+        @Test
+        @DisplayName("should not skip any topic when all topic are assigned to the cluster")
+        void testSkipTopicsNotInEnvironment() {
+            Collection<TopologyFile> topologies = new ArrayList<>();
+
+            final TopologyFile topologyArc = new TopologyFile();
+            final Topic topicUserUpdated = createTopic(topologyArc, "de.volkerfaas.arc", "User:129849", "user_updated", "test");
+            topologies.add(topologyArc);
+
+            final TopologyFile topologyFoo = new TopologyFile();
+            final Topic topicFooCreated = createTopic(topologyFoo, "de.volkerfaas.foo", "User:123765", "foo_created", "test");
+            topologies.add(topologyFoo);
+
+            final TopologyFile topologyBar = new TopologyFile();
+            final Topic topicBarDeleted = createTopic(topologyBar, "de.volkerfaas.bar", "User:135918", "bar_deleted", "test");
+            topologies.add(topologyBar);
+
+            topologyFileService.skipTopicsNotInEnvironment(topologies, "test");
+            final List<Topic> topics = listTopicsInTopologies(topologies);
+            assertNotNull(topics);
+            assertEquals(3, topics.size());
+            assertThat(topics, containsInAnyOrder(topicUserUpdated, topicFooCreated, topicBarDeleted));
+        }
+
+        @Test
+        @DisplayName("should skip topics that are not assigned to the cluster")
+        void testSkipTopicsNotInEnvironmentSkippedOtherEnvironment() {
+            Collection<TopologyFile> topologies = new ArrayList<>();
+
+            final TopologyFile topologyArc = new TopologyFile();
+            final Topic topicUserUpdated = createTopic(topologyArc, "de.volkerfaas.arc", "User:129849", "user_updated", "test");
+            topologies.add(topologyArc);
+
+            final TopologyFile topologyFoo = new TopologyFile();
+            final Topic topicFooCreated = createTopic(topologyFoo, "de.volkerfaas.foo", "User:123765", "foo_created", "test");
+            topologies.add(topologyFoo);
+
+            final TopologyFile topologyBar = new TopologyFile();
+            createTopic(topologyBar, "de.volkerfaas.bar", "User:135918", "bar_deleted", "bar");
+            topologies.add(topologyBar);
+
+            topologyFileService.skipTopicsNotInEnvironment(topologies, "test");
+            final List<Topic> topics = listTopicsInTopologies(topologies);
+            assertNotNull(topics);
+            assertEquals(2, topics.size());
+            assertThat(topics, containsInAnyOrder(topicUserUpdated, topicFooCreated));
+        }
+
+        @Test
+        @DisplayName("should skip topics that are not assigned to any cluster")
+        void testSkipTopicsNotInEnvironmentSkippedNoEnvironment() {
+            Collection<TopologyFile> topologies = new ArrayList<>();
+
+            final TopologyFile topologyArc = new TopologyFile();
+            final Topic topicUserUpdated = createTopic(topologyArc, "de.volkerfaas.arc", "User:129849", "user_updated", "test");
+            topologies.add(topologyArc);
+
+            final TopologyFile topologyFoo = new TopologyFile();
+            createTopic(topologyFoo, "de.volkerfaas.foo", "User:123765", "foo_created", null);
+            topologies.add(topologyFoo);
+
+            final TopologyFile topologyBar = new TopologyFile();
+            final Topic topicBarDeleted = createTopic(topologyBar, "de.volkerfaas.bar", "User:135918", "bar_deleted", "test");
+            topologies.add(topologyBar);
+
+            topologyFileService.skipTopicsNotInEnvironment(topologies, "test");
+            final List<Topic> topics = listTopicsInTopologies(topologies);
+            assertNotNull(topics);
+            assertEquals(2, topics.size());
+            assertThat(topics, containsInAnyOrder(topicUserUpdated, topicBarDeleted));
+        }
+
+        private Topic createTopic(TopologyFile topology, String domainName, String domainPrincipal, String topicName, String cluster) {
+            final Domain domain = new Domain(domainName, domainPrincipal);
+            topology.setDomain(domain);
+            final Visibility visibility = new Visibility(Visibility.Type.PUBLIC);
+            domain.getVisibilities().add(visibility);
+            final Topic topic = new Topic(topicName, 4, (short) 3, Collections.emptyMap());
+            if (Objects.nonNull(cluster)) topic.getClusters().add(cluster);
+            visibility.getTopics().add(topic);
+
+            return topic;
+        }
+
+    }
+
+    private List<Topic> listTopicsInTopologies(Collection<TopologyFile> topologies) {
+        return topologies.stream()
+                .map(TopologyFile::getDomain)
+                .map(Domain::getVisibilities)
+                .flatMap(List::stream)
+                .map(Visibility::getTopics)
+                .flatMap(List::stream)
+                .collect(Collectors.toUnmodifiableList());
     }
 
     private Set<String> mockListSubjects(String suffix, String fullTopicName) {

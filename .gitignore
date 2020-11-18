@@ -3,7 +3,7 @@
 /target/
 /topology
 **/.DS_Store
-/*.env
+/*.cluster
 /*.versionsBackup
 /*.yaml
 /*.properties

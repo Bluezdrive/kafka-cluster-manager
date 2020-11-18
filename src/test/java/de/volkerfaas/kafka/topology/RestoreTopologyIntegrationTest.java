@@ -38,7 +38,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
-@SpringBootTest
+@SpringBootTest(properties = {"documentation.filename=topology.md"})
 @ContextConfiguration(loader= AnnotationConfigContextLoader.class)
 @ExtendWith(SpringExtension.class)
 @DisplayName("The kafka topology manager")

@@ -13,10 +13,7 @@ import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.PropertiesPropertySource;
 import org.springframework.stereotype.Component;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
@@ -42,8 +39,14 @@ public class KafkaClusterManager implements ApplicationRunner {
     @Override
     public void run(ApplicationArguments args) {
         try {
-            final String propertyFile = ApplicationArgumentsUtils.firstStringValueOf(args, "environment", null);
-            final Properties properties = getProperties(propertyFile);
+            final String cluster = ApplicationArgumentsUtils.firstStringValueOf(args, "cluster", null);
+            if (Objects.isNull(cluster)) {
+                LOGGER.error("No cluster set for execution.");
+                return;
+            }
+            LOGGER.info("Using cluster '{}'.", cluster);
+
+            final Properties properties = getProperties(cluster);
             final String directory = ApplicationArgumentsUtils.firstStringValueOf(args, "directory", "topology");
             setTopologyDirectory(properties, directory);
 
@@ -54,13 +57,13 @@ public class KafkaClusterManager implements ApplicationRunner {
             properties.put(ApplicationConfiguration.PROPERTY_KEY_TOPOLOGY_DRY_RUN, dryRun);
 
             final PropertiesPropertySource propertySource = new PropertiesPropertySource("confluent-cloud-topology-builder", properties);
-            environment.getPropertySources().addFirst(propertySource);
+            this.environment.getPropertySources().addFirst(propertySource);
 
             final boolean restore = args.containsOption("restore");
             if (restore) {
                 restoreTopology(directory, domainNames);
             } else {
-                buildTopology(directory, domainNames, allowDeleteAcl, allowDeleteTopics);
+                buildTopology(directory, cluster, domainNames, allowDeleteAcl, allowDeleteTopics);
             }
         } catch (Exception e) {
             if (LOGGER.isDebugEnabled()) {
@@ -81,20 +84,24 @@ public class KafkaClusterManager implements ApplicationRunner {
         System.setProperty(ApplicationConfiguration.PROPERTY_KEY_TOPOLOGY_DIRECTORY, absolutePath);
     }
 
-    public Properties getProperties(String propertyFile) throws IOException {
+    public Properties getProperties(String cluster) throws IOException {
         final Properties properties = new Properties();
-        if (Objects.nonNull(propertyFile)) {
-            try (InputStream input = new FileInputStream(propertyFile)) {
+        if (Objects.nonNull(cluster)) {
+            try (InputStream input = new FileInputStream(cluster + ".cluster")) {
+                LOGGER.info("Configuration file found for environment '{}'", cluster);
                 properties.load(input);
+            } catch (FileNotFoundException e) {
+                LOGGER.warn("No configuration file found for environment '{}'", cluster);
             }
         }
         return properties;
     }
 
-    public void buildTopology(String directory, List<String> domainNames, boolean allowDeleteAcl, boolean allowDeleteTopics) throws InterruptedException, ExecutionException, IOException {
+    public void buildTopology(String directory, String cluster, List<String> domainNames, boolean allowDeleteAcl, boolean allowDeleteTopics) throws InterruptedException, ExecutionException, IOException {
         final Collection<TopologyFile> topologies = topologyFileService.listTopologies(directory, domainNames);
         LOGGER.debug("Topologies have been read from files: {}", topologies);
         if (topologyFileService.isTopologyValid(topologies)) {
+            topologyFileService.skipTopicsNotInEnvironment(topologies, cluster);
             topologyFileService.updateTopology(topologies);
             documentationService.writeReadmeFile(topologies);
             if (allowDeleteAcl && domainNames.isEmpty()) {

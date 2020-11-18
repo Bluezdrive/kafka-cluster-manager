@@ -1,8 +1,8 @@
 # Kafka Cluster Manager
 
 [![Build Status](https://travis-ci.org/Bluezdrive/kafka-cluster-manager.svg?branch=master&service=github)](https://travis-ci.org/Bluezdrive/kafka-cluster-manager)
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/af4e3d89b0a9459a9dd89789bab0ed38)](https://app.codacy.com/gh/Bluezdrive/kafka-cluster-manager?utm_source=github.com&utm_medium=referral&utm_content=Bluezdrive/kafka-cluster-manager&utm_campaign=Badge_Grade)
-[![Codacy Badge](https://app.codacy.com/project/badge/Coverage/f73c3f5d3b8e416284a3ae0a65f1bd9c)](https://www.codacy.com/gh/Bluezdrive/kafka-cluster-manager/dashboard?utm_source=github.com&utm_medium=referral&utm_content=Bluezdrive/kafka-cluster-manager&utm_campaign=Badge_Coverage)
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/6c0e89ca8a24423db9e3f60d9d5c4019)](https://www.codacy.com/gh/Bluezdrive/kafka-cluster-manager/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Bluezdrive/kafka-cluster-manager&amp;utm_campaign=Badge_Grade)
+[![Codacy Badge](https://app.codacy.com/project/badge/Coverage/6c0e89ca8a24423db9e3f60d9d5c4019)](https://www.codacy.com/gh/Bluezdrive/kafka-cluster-manager/dashboard?utm_source=github.com&utm_medium=referral&utm_content=Bluezdrive/kafka-cluster-manager&utm_campaign=Badge_Coverage)
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://gitHub.com/Bluezdrive/kafka-cluster-manager/graphs/commit-activity)
 [![GPLv3 License](https://img.shields.io/badge/License-GPL%20v3-yellow.svg)](https://opensource.org/licenses/)
 [![GitHub release](https://img.shields.io/github/release/Bluezdrive/kafka-cluster-manager.svg)](https://gitHub.com/Bluezdrive/kafka-cluster-manager/releases/)
@@ -22,6 +22,7 @@ Available Flags:
   --help                     Show help.
   --directory=[directory]    Set base directory for topology files. Default is "topology".
   --domain=[domain]          Processes only a single domain
+  --cluster=[cluster]        Sets the cluster to deploy to or to restore from
   --allow-delete-acl         Allow deletion of orphaned ACLs. Cannot be used in combination with flag --domain. (DO NOT USE IN PRODUCTION!)
   --allow-delete-topics      Allow deletion of orphaned topics. Cannot be used in combination with flag --domain. (DO NOT USE IN PRODUCTION!)
   --dry-run                  Makes no changes to the remote topology
@@ -36,7 +37,19 @@ topology
  |    |    +---de.volkerfaas.arc.public.user_updated-key.avsc
  |    |    +---de.volkerfaas.arc.public.user_updated-value.avsc
  +---topology-de.volkerfaas.arc.yaml
+ +---restore-de.volkerfaas.test.yaml
+ +---topology.md
 ```
+
+| Directory/File                                          | Description                                                                   |
+| ------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| topology                                                | Root directory for topology                                                   |
+| topology/events                                         | Directory for storing AVRO schemas of events                                  |
+| topology-[domain-name].yaml                             | Topology file for domain [domain-name]                                        |
+| restore-[domain-name].yaml                              | Restore file for domain [domain-name]                                         |
+| topology.md                                             | Markdown file containing the documentation of entire topology                 |
+| [domain-name].[visibility-type].[topic.name]-key.avsc   | AVRO key schema file for topic [domain-name].[visibility-type].[topic.name]   |
+| [domain-name].[visibility-type].[topic.name]-value.avsc | AVRO value schema file for topic [domain-name].[visibility-type].[topic.name] |
 
 ## Configuration File
 ```YAML
@@ -45,15 +58,16 @@ domain:
   description: "Test domain for architecture stuff"
   principal: "User:129849"
   maintainer:
-    team: "Volker Faas"
+    name: "Volker Faas"
     email: "bluezdrive@volkerfaas.de"
   visibilities:
     - type: public
       consumers:
         - principal: "User:125382"
       topics:
-        - name: "user_updated"
+        - name: "user_updated" # Full topic name is "de.volkerfaas.arc.public.user_updated"
           description: "Dummy topic for architecture stuff."
+          clusters: ['development', 'staging']
           numPartitions: 3
           replicationFactor: 3
           keySchemaFile: "events/de.volkerfaas.arc/de.volkerfaas.arc.public.user_updated-key.avsc"
@@ -61,6 +75,37 @@ domain:
           config:
             cleanupPolicy: "compact"
 ```
+
+| Field                                                | Mandatory | Value                          | Description                                                                                                 |
+| ---------------------------------------------------- | ----------| ------------------------------ |------------------------------------------------------------------------------------------------------------ |
+| domain.name                                          | Yes       | ^([a-z]+)\.([a-z]+)\.([a-z]+)$ | Name of the domain described by this topology file                                                          |
+| domain.description                                   | Yes       | string                         | Short description of what the domain stands for                                                             |
+| domain.principal                                     | Yes       | ^(User)+\:([0-9]+)*$           | Reference to service account for accessing topics at domain level in format "User:[service-account-id]"     |
+| domain.maintainer.name                               | Yes       | string                         | Name of person or team that maintains the domain                                                            |
+| domain.maintainer.email                              | Yes       | email                          | E-Mail-Address of person or team that maintains the domain                                                  |
+| domain.visibilities[].type                           | Yes       | public, protected or private   | Topic visibility as one of public, protected or private                                                     |
+| domain.visibilities[].consumers[].principal          | No        | ^(User)+\:([0-9]+)*$           | Reference to service account for accessing topics at visibility level in format "User:[service-account-id]" |
+| domain.visibilities[].topics[].name                  | Yes       | ^[a-z]+(_[a-z]+)*$             | Name of topic                                                                                               |
+| domain.visibilities[].topics[].description           | Yes       | string                         | Short description of what kind of events the topic handles                                                  |
+| domain.visibilities[].topics[].clusters              | No        | string                         | Reference to clusters the topic has to be deployed to<sup>*)</sup>                                           |
+| domain.visibilities[].topics[].numPartitions         | Yes       | 1 - 20 (default 6)             | Number of partitions to be created for topic                                                                |
+| domain.visibilities[].topics[].replicationFactor     | No        | short (default 3)              | Number of partitions to be created for topic                                                                |
+| domain.visibilities[].topics[].keySchemaFile         | No        | path                           | Relative path to the key schema file associated with the topic                                              |
+| domain.visibilities[].topics[].valueSchemaFile       | Yes       | path                           | Relative path to the value schema file associated with the topic                                            |
+| domain.visibilities[].topics[].config                | No        | key/value map                  | Configuration parameters in camelCase for topic                                                             |
+| domain.visibilities[].topics[].consumers[].principal | No        | ^(User)+\:([0-9]+)*$           | Reference to service account for accessing topics at topic level in format "User:[service-account-id]"      |
+
+<sup>*)</sup>&nbsp;Either there is a dedicated configuration file for the cluster "[cluster].cluster" that contains the required environment variables or the environment variables have been set for the cluster to deploy to.
+
+## Environment Variables
+| Variable                   | Description                                             |
+| -------------------------  | ------------------------------------------------------- |
+| BOOTSTRAP_SERVER           | Bootstrap server of Apache Kafka® cluster to connect to |
+| CLUSTER_API_KEY            | API key for accessing cluster                           |
+| CLUSTER_API_SECRET         | API secret for accessing cluster                        |
+| SCHEMA_REGISTRY_URL        | URL to schema registry associated with cluster          |
+| SCHEMA_REGISTRY_API_KEY    | API key for accessing the schema registry               |
+| SCHEMA_REGISTRY_API_SECRET | API secret for accessing the schema registry            |
 
 ## Avro Schema files
 
@@ -72,18 +117,54 @@ In order to access an Apache Kafka® cluster with the Kafka Cluster Manager, the
 
 | Permission | Operation        | Resource | Name          | Type    |
 | ---------- | ---------------- | -------- | ------------- | ------- |
-| ALLOW      | ALTER            | CLUSTER  | kafka-cluster | LITERAL |
 | ALLOW      | CREATE           | CLUSTER  | kafka-cluster | LITERAL |
+| ALLOW      | ALTER            | CLUSTER  | kafka-cluster | LITERAL |
 | ALLOW      | DESCRIBE         | CLUSTER  | kafka-cluster | LITERAL |
 | ALLOW      | ALTER            | TOPIC    | *             | LITERAL |
-| ALLOW      | DESCRIBE_CONFIGS | TOPIC    | *             | LITERAL |
+| ALLOW      | DELETE           | TOPIC    | *             | LITERAL |
+| ALLOW      | ALTER_CONFIGS    | TOPIC    | *             | LITERAL |
 | ALLOW      | DESCRIBE         | TOPIC    | *             | LITERAL |
+| ALLOW      | DESCRIBE_CONFIGS | TOPIC    | *             | LITERAL |
+| ALLOW      | DESCRIBE         | GROUP    | *             | LITERAL |
 
-### Domain Principal
+### Consumer and Producer Principal at Domain Level
 
-### Consumer Principal
+The Kafka Cluster Manager sets the following ACL entries when a principal at domain level: 
+
+| Permission | Operation        | Resource         | Name           | Type     |
+| ---------- | ---------------- | ---------------- | -------------- | -------- |
+| ALLOW      | DESCRIBE         | TOPIC            | [domain-name]. | PREFIXED |
+| ALLOW      | READ             | TOPIC            | [domain-name]. | PREFIXED |
+| ALLOW      | WRITE            | TOPIC            | [domain-name]. | PREFIXED |
+| ALLOW      | WRITE            | TRANSACTIONAL_ID | [domain-name]. | PREFIXED |
+| ALLOW      | IDEMPOTENT_WRITE | CLUSTER          | kafka-cluster  | LITERAL  |
+| ALLOW      | READ             | GROUP            | [domain-name]. | PREFIXED |
+
+### Consumer Principal at Visibility Level
+
+The Kafka Cluster Manager sets the following ACL entries when a principal at visibility level:
+
+| Permission | Operation        | Resource         | Name                             | Type     |
+| ---------- | ---------------- | ---------------- | -------------------------------- | -------- |
+| ALLOW      | READ             | GROUP            | [domain-name].[visibility-type]. | PREFIXED |
+| ALLOW      | READ             | TOPIC            | [domain-name].[visibility-type]. | PREFIXED |
+| ALLOW      | DESCRIBE         | TOPIC            | [domain-name].[visibility-type]. | PREFIXED |
+
+### Consumer Principal at Topic Level
+
+The Kafka Cluster Manager sets the following ACL entries when a principal at topic level:
+
+| Permission | Operation        | Resource         | Name                                         | Type    |
+| ---------- | ---------------- | ---------------- | -------------------------------------------- | ------- |
+| ALLOW      | READ             | GROUP            | [domain-name].[visibility-type].[topic-name] | LITERAL |
+| ALLOW      | READ             | TOPIC            | [domain-name].[visibility-type].[topic-name] | LITERAL |
+| ALLOW      | DESCRIBE         | TOPIC            | [domain-name].[visibility-type].[topic-name] | LITERAL |
 
 ## Change History
+
+### 1.1
+
+*   Assign topics to clusters with topic field "cluster" and flag "--cluster=[cluster]"
 
 ### 1.0
 

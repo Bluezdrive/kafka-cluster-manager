@@ -8,6 +8,7 @@ import net.steppschuh.markdowngenerator.table.Table;
 import net.steppschuh.markdowngenerator.text.heading.Heading;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
 
 import java.io.IOException;
@@ -21,15 +22,19 @@ public class DocumentationServiceImpl implements DocumentationService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DocumentationServiceImpl.class);
 
+    private final String filename;
+
+    public DocumentationServiceImpl(@Value("${documentation.filename}") String filename) {
+        this.filename = filename;
+    }
+
     @Override
     public void writeReadmeFile(Collection<TopologyFile> topologies) throws IOException {
         final String directory = System.getProperty(ApplicationConfiguration.PROPERTY_KEY_TOPOLOGY_DIRECTORY);
-        final String fileName = directory + "/README.md";
-        final String content = buildDomainTable(topologies) +
-                buildTopicsTable(topologies);
-        Files.writeString(Path.of(fileName), content, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
-
-        LOGGER.info("Documentation in README.md has been updated");
+        final Path path = Path.of(directory,  filename);
+        final String content = buildDomainTable(topologies) + buildTopicsTable(topologies);
+        Files.writeString(path, content, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+        LOGGER.info("Documentation in {} has been updated", filename);
     }
 
     public String buildDomainTable(Collection<TopologyFile> topologies) {
