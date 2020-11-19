@@ -134,6 +134,7 @@ public class Topic implements ConsumerAccessControl {
         return schemaFiles;
     }
 
+    @NotEmpty(message = "must not be empty as topic has to be assigned to at least one cluster")
     public List<String> getClusters() {
         return clusters;
     }

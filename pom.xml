@@ -13,7 +13,7 @@
 
     <groupId>de.volkerfaas</groupId>
     <artifactId>kafka-cluster-manager</artifactId>
-    <version>1.1</version>
+    <version>1.1.1</version>
     <description>Topology manager for Apache Kafka® clusters.</description>
     <developers>
         <developer>

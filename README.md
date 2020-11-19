@@ -29,9 +29,13 @@ Available Flags:
   --restore                  Restores the domains listed with flag --domain into file "topology-[domain].yaml"
 ```
 
-## Directory Structure
+## Directory Structure Example
 ```txt
 topology
+ +---conf
+ |    +---development.cluster
+ |    +---staging.cluster
+ |    +---production.cluster
  +---events
  |    +---de.volkerfaas.arc
  |    |    +---de.volkerfaas.arc.public.user_updated-key.avsc
@@ -44,6 +48,8 @@ topology
 | Directory/File                                          | Description                                                                   |
 | ------------------------------------------------------- | ----------------------------------------------------------------------------- |
 | topology                                                | Root directory for topology                                                   |
+| topology/conf                                           | Directory for configuration files of clusters                                 |
+| topology/conf/[cluster].cluster                         | Configuration file for cluster                                                |
 | topology/events                                         | Directory for storing AVRO schemas of events                                  |
 | topology-[domain-name].yaml                             | Topology file for domain [domain-name]                                        |
 | restore-[domain-name].yaml                              | Restore file for domain [domain-name]                                         |
@@ -51,7 +57,7 @@ topology
 | [domain-name].[visibility-type].[topic.name]-key.avsc   | AVRO key schema file for topic [domain-name].[visibility-type].[topic.name]   |
 | [domain-name].[visibility-type].[topic.name]-value.avsc | AVRO value schema file for topic [domain-name].[visibility-type].[topic.name] |
 
-## Configuration File
+## Configuration File Example
 ```YAML
 domain:
   name: "de.volkerfaas.arc"
@@ -87,7 +93,7 @@ domain:
 | domain.visibilities[].consumers[].principal          | No        | ^(User)+\:([0-9]+)*$           | Reference to service account for accessing topics at visibility level in format "User:[service-account-id]" |
 | domain.visibilities[].topics[].name                  | Yes       | ^[a-z]+(_[a-z]+)*$             | Name of topic                                                                                               |
 | domain.visibilities[].topics[].description           | Yes       | string                         | Short description of what kind of events the topic handles                                                  |
-| domain.visibilities[].topics[].clusters              | No        | string                         | Reference to clusters the topic has to be deployed to<sup>*)</sup>                                           |
+| domain.visibilities[].topics[].clusters              | Yes       | string                         | Reference to clusters the topic has to be deployed to<sup>*)</sup>                                           |
 | domain.visibilities[].topics[].numPartitions         | Yes       | 1 - 20 (default 6)             | Number of partitions to be created for topic                                                                |
 | domain.visibilities[].topics[].replicationFactor     | No        | short (default 3)              | Number of partitions to be created for topic                                                                |
 | domain.visibilities[].topics[].keySchemaFile         | No        | path                           | Relative path to the key schema file associated with the topic                                              |
@@ -95,7 +101,7 @@ domain:
 | domain.visibilities[].topics[].config                | No        | key/value map                  | Configuration parameters in camelCase for topic                                                             |
 | domain.visibilities[].topics[].consumers[].principal | No        | ^(User)+\:([0-9]+)*$           | Reference to service account for accessing topics at topic level in format "User:[service-account-id]"      |
 
-<sup>*)</sup>&nbsp;Either there is a dedicated configuration file for the cluster "[cluster].cluster" that contains the required environment variables or the environment variables have been set for the cluster to deploy to.
+<sup>*)</sup>&nbsp;Either there is a dedicated configuration file for the cluster "[cluster].cluster" that contains the required variables, or environment variables have been set for the cluster to deploy to. Please note that variables in the configuration file always overwrite environment variables that have already been set.
 
 ## Environment Variables
 | Variable                   | Description                                             |

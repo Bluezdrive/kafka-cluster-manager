@@ -32,6 +32,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 @DisplayName("The validation of")
 class ValidationTest {
 
+    private static final List<String> CLUSTERS = List.of("test");
+
     private HibernateValidatorFactory validatorFactory;
     private String directory;
 
@@ -513,6 +515,7 @@ class ValidationTest {
             final Topic topic = new Topic();
             topic.setName("user_updated");
             topic.setDescription("This is the topic for the UserUpdated event.");
+            topic.getClusters().addAll(CLUSTERS);
             topic.setValueSchemaFile("events/de.volkerfaas.arc/de.volkerfaas.arc.public.user_updated-value.avsc");
             assertEquals(6, topic.getNumPartitions());
             assertEquals(3, topic.getReplicationFactor());
@@ -531,6 +534,7 @@ class ValidationTest {
             final Topic topic = new Topic();
             topic.setName("user_updated");
             topic.setDescription("This is the topic for the UserUpdated event.");
+            topic.getClusters().addAll(CLUSTERS);
             topic.setValueSchemaFile("events/de.volkerfaas.arc/de.volkerfaas.arc.public.user_updated-value.avsc");
             topic.setNumPartitions(0);
 
@@ -552,6 +556,7 @@ class ValidationTest {
             final Topic topic = new Topic();
             topic.setName("user_updated");
             topic.setDescription("This is the topic for the UserUpdated event.");
+            topic.getClusters().addAll(CLUSTERS);
             topic.setValueSchemaFile("events/de.volkerfaas.arc/de.volkerfaas.arc.public.user_updated-value.avsc");
             topic.setNumPartitions(21);
 
@@ -577,6 +582,7 @@ class ValidationTest {
             topic.setName("user_updated");
             topic.setPrefix("de.volkerfaas.arc.public.");
             topic.setDescription("This is the topic for the UserUpdated event.");
+            topic.getClusters().addAll(CLUSTERS);
             topic.setValueSchemaFile("events/de.volkerfaas.arc/de.volkerfaas.arc.public.user_updated-value.avsc");
             topic.setNumPartitions(4);
 
@@ -598,6 +604,7 @@ class ValidationTest {
             topic.setName("user_updated");
             topic.setPrefix("de.volkerfaas.arc.public.");
             topic.setDescription("This is the topic for the UserUpdated event.");
+            topic.getClusters().addAll(CLUSTERS);
             topic.setValueSchemaFile("events/de.volkerfaas.arc/de.volkerfaas.arc.public.user_updated-value.avsc");
             topic.setNumPartitions(2);
 
@@ -623,6 +630,7 @@ class ValidationTest {
             final Topic topic = new Topic();
             topic.setName("user_updated");
             topic.setDescription("This is the topic for the UserUpdated event.");
+            topic.getClusters().addAll(CLUSTERS);
             topic.setValueSchemaFile("events/de.volkerfaas.arc/de.volkerfaas.arc.public.user_updated-value.avsc");
             topic.getConfig().put(ApplicationConfiguration.TOPIC_CONFIG_KEY_CLEANUP_POLICY, cleanupPolicy);
 
@@ -640,6 +648,7 @@ class ValidationTest {
             final Topic topic = new Topic();
             topic.setName("user_updated");
             topic.setDescription("This is the topic for the UserUpdated event.");
+            topic.getClusters().addAll(CLUSTERS);
             topic.setValueSchemaFile("events/de.volkerfaas.arc/de.volkerfaas.arc.public.user_updated-value.avsc");
             topic.getConfig().put(ApplicationConfiguration.TOPIC_CONFIG_KEY_CLEANUP_POLICY, "foo");
 

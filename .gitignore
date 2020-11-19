@@ -1,9 +1,10 @@
 /.idea/
 /*.iml
-/target/
+/target
+/conf
 /topology
 **/.DS_Store
-/*.cluster
+**/*.cluster
 /*.versionsBackup
 /*.yaml
 /*.properties

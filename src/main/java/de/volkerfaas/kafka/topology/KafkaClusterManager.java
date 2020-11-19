@@ -13,7 +13,8 @@ import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.PropertiesPropertySource;
 import org.springframework.stereotype.Component;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
@@ -38,28 +39,27 @@ public class KafkaClusterManager implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) {
+        final String cluster = ApplicationArgumentsUtils.firstStringValueOf(args, "cluster", null);
+        if (Objects.isNull(cluster)) {
+            LOGGER.error("No cluster set for execution.");
+            return;
+        }
+
+        final Properties properties = new Properties();
+        final String directory = ApplicationArgumentsUtils.firstStringValueOf(args, "directory", "topology");
+        setTopologyDirectory(properties, directory);
+
+        final List<String> domainNames = ApplicationArgumentsUtils.stringValuesOf(args, "domain");
+        final boolean allowDeleteAcl = args.containsOption("allow-delete-acl");
+        final boolean allowDeleteTopics = args.containsOption("allow-delete-topics");
+        final boolean dryRun = args.containsOption("dry-run");
+        properties.put(ApplicationConfiguration.PROPERTY_KEY_TOPOLOGY_DRY_RUN, dryRun);
+
+        final PropertiesPropertySource propertySource = new PropertiesPropertySource("confluent-cloud-topology-builder", properties);
+        this.environment.getPropertySources().addFirst(propertySource);
+
+        final boolean restore = args.containsOption("restore");
         try {
-            final String cluster = ApplicationArgumentsUtils.firstStringValueOf(args, "cluster", null);
-            if (Objects.isNull(cluster)) {
-                LOGGER.error("No cluster set for execution.");
-                return;
-            }
-            LOGGER.info("Using cluster '{}'.", cluster);
-
-            final Properties properties = getProperties(cluster);
-            final String directory = ApplicationArgumentsUtils.firstStringValueOf(args, "directory", "topology");
-            setTopologyDirectory(properties, directory);
-
-            final List<String> domainNames = ApplicationArgumentsUtils.stringValuesOf(args, "domain");
-            final boolean allowDeleteAcl = args.containsOption("allow-delete-acl");
-            final boolean allowDeleteTopics = args.containsOption("allow-delete-topics");
-            final boolean dryRun = args.containsOption("dry-run");
-            properties.put(ApplicationConfiguration.PROPERTY_KEY_TOPOLOGY_DRY_RUN, dryRun);
-
-            final PropertiesPropertySource propertySource = new PropertiesPropertySource("confluent-cloud-topology-builder", properties);
-            this.environment.getPropertySources().addFirst(propertySource);
-
-            final boolean restore = args.containsOption("restore");
             if (restore) {
                 restoreTopology(directory, domainNames);
             } else {
@@ -82,19 +82,6 @@ public class KafkaClusterManager implements ApplicationRunner {
         final String absolutePath = path.getAbsolutePath();
         properties.put(ApplicationConfiguration.PROPERTY_KEY_TOPOLOGY_DIRECTORY, absolutePath);
         System.setProperty(ApplicationConfiguration.PROPERTY_KEY_TOPOLOGY_DIRECTORY, absolutePath);
-    }
-
-    public Properties getProperties(String cluster) throws IOException {
-        final Properties properties = new Properties();
-        if (Objects.nonNull(cluster)) {
-            try (InputStream input = new FileInputStream(cluster + ".cluster")) {
-                LOGGER.info("Configuration file found for environment '{}'", cluster);
-                properties.load(input);
-            } catch (FileNotFoundException e) {
-                LOGGER.warn("No configuration file found for environment '{}'", cluster);
-            }
-        }
-        return properties;
     }
 
     public void buildTopology(String directory, String cluster, List<String> domainNames, boolean allowDeleteAcl, boolean allowDeleteTopics) throws InterruptedException, ExecutionException, IOException {
