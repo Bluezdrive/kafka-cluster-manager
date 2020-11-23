@@ -1,0 +1,101 @@
+package de.volkerfaas.kafka.topology;
+
+import de.volkerfaas.kafka.topology.bootstrap.Bootstrap;
+import de.volkerfaas.kafka.topology.model.Domain;
+import de.volkerfaas.kafka.topology.model.TopologyFile;
+import de.volkerfaas.kafka.topology.services.DocumentationService;
+import de.volkerfaas.kafka.topology.services.TopologyBuildService;
+import de.volkerfaas.kafka.topology.services.TopologyRestoreService;
+import de.volkerfaas.kafka.topology.utils.ApplicationArgumentsUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.ApplicationArguments;
+import org.springframework.boot.ApplicationRunner;
+import org.springframework.stereotype.Component;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.Collection;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
+
+@Component
+public class KafkaClusterManager implements ApplicationRunner {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(KafkaClusterManager.class);
+
+    private final DocumentationService documentationService;
+    private final TopologyBuildService topologyBuildService;
+    private final TopologyRestoreService topologyRestoreService;
+
+    @Autowired
+    public KafkaClusterManager(final DocumentationService documentationService, final TopologyBuildService topologyBuildService, final TopologyRestoreService topologyRestoreService) {
+        this.documentationService = documentationService;
+        this.topologyBuildService = topologyBuildService;
+        this.topologyRestoreService = topologyRestoreService;
+    }
+
+    @Override
+    public void run(final ApplicationArguments args) {
+        final String directory = getTopologyDirectory(args);
+        final List<String> domainNames = ApplicationArgumentsUtils.valuesOf(args, "domain");
+        final boolean restore = args.containsOption("restore");
+        try {
+            if (restore) {
+                restoreTopology(directory, domainNames);
+            } else {
+                final boolean allowDeleteAcl = args.containsOption("allow-delete-acl");
+                final boolean allowDeleteTopics = args.containsOption("allow-delete-topics");
+                buildTopology(directory, domainNames, allowDeleteAcl, allowDeleteTopics);
+            }
+        } catch (Exception e) {
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.error("", e);
+            } else {
+                LOGGER.error("{}", e.getMessage());
+            }
+        }
+    }
+
+    public String getTopologyDirectory(final ApplicationArguments args) {
+        final String directory = ApplicationArgumentsUtils.valueOf(args, "directory", "topology");
+        final File path = new File(directory).getAbsoluteFile();
+        if (!path.exists() || !path.isDirectory()) {
+            throw new IllegalStateException("Directory '" + directory + "' doesn't exist.");
+        }
+        return path.getAbsolutePath();
+    }
+
+    public void buildTopology(final String directory, final Collection<String> domainNames, final boolean allowDeleteAcl, final boolean allowDeleteTopics) throws InterruptedException, ExecutionException, IOException {
+        final Collection<TopologyFile> topologies = topologyBuildService.listTopologies(directory);
+        LOGGER.debug("Topologies have been read from files: {}", topologies);
+        final boolean valid = topologyBuildService.isTopologyValid(topologies, directory);
+        if (!valid) {
+            return;
+        }
+        final Collection<Domain> domains = topologyBuildService.listDomainsForUpdate(topologies, domainNames);
+        topologyBuildService.updateTopology(domains, directory);
+        documentationService.writeReadmeFile(topologies, directory);
+        if ((allowDeleteAcl || allowDeleteTopics) && !domainNames.isEmpty()) {
+            LOGGER.error("Usage of flag --allow-delete-acl or --allow-delete-topics only allowed without flag --domain");
+            System.out.println(Bootstrap.HELP);
+            return;
+        }
+        if (allowDeleteAcl) {
+            topologyBuildService.deleteOrphanedAclBindings(domains);
+        }
+        if (allowDeleteTopics) {
+            topologyBuildService.deleteOrphanedTopics(domains);
+        }
+    }
+
+    public void restoreTopology(final String directory, final List<String> domainNames) throws ExecutionException, InterruptedException {
+        if (domainNames.isEmpty()) {
+            LOGGER.warn("No domains to restore. Please specify domains to be restored by using the --domain=[domain] flag.");
+            return;
+        }
+        topologyRestoreService.restoreTopologies(directory, domainNames);
+    }
+
+}

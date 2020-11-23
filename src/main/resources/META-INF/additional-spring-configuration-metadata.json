@@ -1,0 +1,59 @@
+{
+  "properties": [
+    {
+      "name": "documentation.filename",
+      "type": "java.lang.String",
+      "description": "Description for documentation.filename."
+    },
+    {
+      "name": "kafka.bootstrap-servers",
+      "type": "java.lang.String",
+      "description": "Description for kafka.bootstrap-servers."
+    },
+    {
+      "name": "kafka.ssl.endpoint.identification.algorithm",
+      "type": "java.lang.String",
+      "description": "Description for kafka.ssl.endpoint.identification.algorithm."
+    },
+    {
+      "name": "kafka.sasl.mechanism",
+      "type": "java.lang.String",
+      "description": "Description for kafka.sasl.mechanism."
+    },
+    {
+      "name": "kafka.request.timeout.ms",
+      "type": "java.lang.String",
+      "description": "Description for kafka.request.timeout.ms."
+    },
+    {
+      "name": "kafka.security.protocol",
+      "type": "java.lang.String",
+      "description": "Description for kafka.security.protocol."
+    },
+    {
+      "name": "kafka.retry.backoff.ms",
+      "type": "java.lang.String",
+      "description": "Description for kafka.retry.backoff.ms."
+    },
+    {
+      "name": "kafka.sasl.jaas.config",
+      "type": "java.lang.String",
+      "description": "Description for kafka.sasl.jaas.config."
+    },
+    {
+      "name": "schema.registry.url",
+      "type": "java.lang.String",
+      "description": "Description for schema.registry.url."
+    },
+    {
+      "name": "schema.registry.basic.auth.credentials.source",
+      "type": "java.lang.String",
+      "description": "Description for schema.registry.basic.auth.credentials.source."
+    },
+    {
+      "name": "schema.registry.basic.auth.user.info",
+      "type": "java.lang.String",
+      "description": "Description for schema.registry.basic.auth.user.info."
+    }
+  ]
+}
