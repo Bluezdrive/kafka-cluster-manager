@@ -226,7 +226,7 @@ public class SchemaRegistryRepositoryImpl implements SchemaRegistryRepository {
             }
             return schemaRegistryClient.getVersion(subject, parsedSchema);
         } catch (RestClientException e) {
-            if (e.getErrorCode() == 40401) {
+            if (e.getErrorCode() == 40401 || e.getErrorCode() == 40403) {
                 return 0;
             } else {
                 throw new IllegalStateException(e);
