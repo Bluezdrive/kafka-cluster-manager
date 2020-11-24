@@ -107,11 +107,12 @@ public class KafkaClusterRepositoryImpl implements KafkaClusterRepository {
             LOGGER.info("No orphaned ACLs to be removed from cluster");
         } else if (dryRun) {
             LOGGER.info("Orphaned ACLs to be removed from cluster");
+            printAclBindingFilters(aclBindingFilters);
         } else {
             aclBindings = adminClient.deleteAcls(aclBindingFilters).all().get();
             LOGGER.info("Orphaned ACLs removed from cluster");
+            printAclBindings(aclBindings);
         }
-        printAclBindings(aclBindings);
 
         return Collections.unmodifiableCollection(aclBindings);
     }
@@ -354,6 +355,19 @@ public class KafkaClusterRepositoryImpl implements KafkaClusterRepository {
                     new Column().header("Resource").dataAlign(LEFT).with(aclBinding -> aclBinding.pattern().resourceType().toString()),
                     new Column().header("Name").dataAlign(LEFT).with(aclBinding -> aclBinding.pattern().name()),
                     new Column().header("Type").dataAlign(LEFT).with(aclBinding -> aclBinding.pattern().patternType().toString())
+            )));
+        }
+    }
+
+    private void printAclBindingFilters(Collection<AclBindingFilter> aclBindingFilters) {
+        if (Objects.nonNull(aclBindingFilters) && !aclBindingFilters.isEmpty()) {
+            System.out.println(getTable(aclBindingFilters, Arrays.asList(
+                    new Column().header("Principal").dataAlign(LEFT).with(aclBinding -> aclBinding.entryFilter().principal()),
+                    new Column().header("Permission").dataAlign(LEFT).with(aclBinding -> aclBinding.entryFilter().permissionType().toString()),
+                    new Column().header("Operation").dataAlign(LEFT).with(aclBinding -> aclBinding.entryFilter().operation().toString()),
+                    new Column().header("Resource").dataAlign(LEFT).with(aclBinding -> aclBinding.patternFilter().resourceType().toString()),
+                    new Column().header("Name").dataAlign(LEFT).with(aclBinding -> aclBinding.patternFilter().name()),
+                    new Column().header("Type").dataAlign(LEFT).with(aclBinding -> aclBinding.patternFilter().patternType().toString())
             )));
         }
     }
