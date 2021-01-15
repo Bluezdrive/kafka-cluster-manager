@@ -1,0 +1,30 @@
+cluster:
+  kafka:
+    bootstrap.servers: ${BOOTSTRAP_SERVER}
+    request.timeout.ms: 20000
+    retry.backoff.ms: 500
+    security.protocol: SASL_SSL
+    sasl.mechanism: PLAIN
+    sasl.jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule   required username='${CLUSTER_API_KEY}'   password='${CLUSTER_API_SECRET}';
+    ssl.endpoint.identification.algorithm: https
+  schema-registry:
+    schema.registry.url: ${SCHEMA_REGISTRY_URL}
+    basic.auth.credentials.source: USER_INFO
+    schema.registry.basic.auth.user.info: ${SCHEMA_REGISTRY_API_KEY}:${SCHEMA_REGISTRY_API_SECRET}
+documentation:
+  filename: topology.md
+config:
+  type: file
+  directory: config/
+  resource: ${config.type}:${config.directory}
+logging:
+  pattern:
+    console: "%clr(${LOG_LEVEL_PATTERN:%5p}) %m%n"
+  level:
+    root: info
+    org.apache.kafka: error
+    com.ulisesbocchio.jasyptspringboot: warn
+spring:
+  output:
+    ansi:
+      enabled: always
