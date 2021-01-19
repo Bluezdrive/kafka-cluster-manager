@@ -1,0 +1,6 @@
+documentation:
+  filename: topology.md
+config:
+  type: classpath
+  directory: conf/
+  resource: ${config.type}:${config.directory}
