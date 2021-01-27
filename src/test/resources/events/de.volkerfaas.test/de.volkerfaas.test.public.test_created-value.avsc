@@ -1,0 +1,11 @@
+{
+  "type": "record",
+  "name": "TestCreated",
+  "namespace": "de.volkerfaas.test",
+  "fields": [
+    {
+      "name": "id",
+      "type": "string"
+    }
+  ]
+}
