@@ -1,0 +1,10 @@
+cloud:
+  apiKey: none
+  apiSecret: none
+documentation:
+  topology-filename: topology.md
+  events-filename: events.md
+config:
+  type: classpath
+  directory: conf/
+  resource: ${config.type}:${config.directory}
