@@ -80,7 +80,7 @@ public class ApplicationConfiguration {
     public static final String REGEX_SCHEMA_FILENAME = "(" + REGEX_SCHEMA_SUBJECT + ")\\.(avsc|proto|json)";
     public static final String REGEX_SCHEMA_PATH_RELATIVE = "^.*?" + EVENTS_DIRECTORY + DIRECTORY_DELIMITER + REGEX_DOMAIN + DIRECTORY_DELIMITER + REGEX_SCHEMA_FILENAME + "$";
     public static final String REGEX_TOPOLOGY_FILENAME = "topology\\-" + REGEX_DOMAIN + "\\.yaml";
-    public static final String TOPIC_CONFIG_KEY_CLEANUP_POLICY = "cleanup.policy";
+    public static final String TOPIC_CONFIG_KEY_CLEANUP_POLICY = "cleanupPolicy";
 
     @Bean
     public CacheManager cacheManager() {

@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import static de.volkerfaas.kafka.topology.ApplicationConfiguration.REGEX_TOPIC_NAME;
 
 @HasValidPartitionIncrementation
+@HasValidConfig
 public class Topic implements ItemWithConsumers {
 
     private final List<String> clusters;
@@ -44,7 +45,6 @@ public class Topic implements ItemWithConsumers {
         return clusters;
     }
 
-    @ValidTopicConfig
     public Map<String, String> getConfig() {
         return config;
     }
