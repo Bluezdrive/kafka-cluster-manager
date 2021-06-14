@@ -734,7 +734,7 @@ class ValidationTest {
 
             final ConstraintViolation<Topic> violation = violations.stream().findFirst().orElse(null);
             assertNotNull(violation);
-            assertEquals("must be either compact or delete", violation.getMessage());
+            assertEquals("must be either compact, delete or compact,delete", violation.getMessage());
         }
 
     }
