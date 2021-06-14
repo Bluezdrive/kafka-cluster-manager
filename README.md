@@ -160,6 +160,7 @@ The variables can be used as environment variables as well as in a YAML property
 | SCHEMA_REGISTRY_API_SECRET | API secret for accessing the schema registry            |
 
 ### YAML Property file
+The YAML properties file must be saved in a subdirectory "config" to the Kafka Cluster Manager. It is always named "application-[cluster].yaml". The placeholder [cluster] references the name of the cluster to which the deployment is executed. This is used in the --cluster command line argument.
 
 ```YAML
 BOOTSTRAP_SERVER: [host]:[port]
