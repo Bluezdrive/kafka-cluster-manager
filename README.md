@@ -249,6 +249,7 @@ docker rm /kafka-cluster-manager > /dev/null 2>&1
 
 ### 2.6.2
 
+-   Feature: Support for cleanupPolicy: "compact,delete"U
 -   Bugfix: Fixed test CreateNewTopic.testCreateNewTopic.
 
 ### 2.6.1
