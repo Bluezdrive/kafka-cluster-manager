@@ -247,6 +247,15 @@ docker rm /kafka-cluster-manager > /dev/null 2>&1
 
 ## Change History
 
+### 2.6.2
+
+-   Bugfix: Fixed test CreateNewTopic.testCreateNewTopic.
+
+### 2.6.1
+
+-   Reference domains as consumer
+-   Bugfix: Update of documentation fails when domain doesn't have events
+
 ### 2.6
 
 -   Added documentation file for events
