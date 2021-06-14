@@ -141,7 +141,7 @@ class TopicServiceImplTest {
             assertEquals("de.volkerfaas.arc.public.user_updated", newTopic.name());
             assertEquals(6, newTopic.numPartitions());
             assertEquals(3, newTopic.replicationFactor());
-            assertEquals("compact", newTopic.configs().get(ApplicationConfiguration.TOPIC_CONFIG_KEY_CLEANUP_POLICY));
+            assertEquals("compact", newTopic.configs().get("cleanup.policy"));
         }
 
     }

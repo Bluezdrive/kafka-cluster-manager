@@ -31,10 +31,8 @@ public class HasValidConfigValidator implements ConstraintValidator<HasValidConf
                         .addConstraintViolation();
                 return false;
             }
-            final ValidatorPayload validatorPayload = context.unwrap(HibernateConstraintValidatorContext.class).getConstraintValidatorPayload(ValidatorPayload.class);
-            final Collection<TopicConfiguration> topicConfigurations = validatorPayload.getTopicConfigurations();
-            final boolean newTopic = topicConfigurations.stream().noneMatch(topicConfiguration -> topicConfiguration.getName().equals(topic.getFullName()));
-            if (newTopic) {
+            final Collection<TopicConfiguration> topicConfigurations = getTopicConfigurations(context);
+            if (isNewTopic(topic, topicConfigurations)) {
                 return true;
             }
             final String currentCleanupPolicy = topicConfigurations.stream()
@@ -53,6 +51,16 @@ public class HasValidConfigValidator implements ConstraintValidator<HasValidConf
         }
 
         return true;
+    }
+
+    private boolean isNewTopic(Topic topic, Collection<TopicConfiguration> topicConfigurations) {
+        return topicConfigurations.stream().noneMatch(topicConfiguration -> topicConfiguration.getName().equals(topic.getFullName()));
+    }
+
+    private Collection<TopicConfiguration> getTopicConfigurations(ConstraintValidatorContext context) {
+        final ValidatorPayload validatorPayload = context.unwrap(HibernateConstraintValidatorContext.class).getConstraintValidatorPayload(ValidatorPayload.class);
+        final Collection<TopicConfiguration> topicConfigurations = validatorPayload.getTopicConfigurations();
+        return topicConfigurations;
     }
 
 }
