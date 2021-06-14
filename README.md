@@ -130,6 +130,7 @@ domain:
 | domain.maintainer.email                                      | Yes       | email                          | E-Mail-Address of person or team that maintains the domain                                                       |
 | domain.visibilities[].type                                   | Yes       | public, protected or private   | Topic visibility as one of public, protected or private                                                          |
 | domain.visibilities[].consumers[].principal                  | No        | ^(User)+\:([0-9]+)*$           | Reference to service account for accessing topics at visibility level in format "User:[service-account-id]"      |
+| domain.visibilities[].consumers[].domain                     | No        | ^([a-z]+)\.([a-z]+)\.([a-z]+)$ | Reference to domain for accessing topics at visibility level.                                                    |
 | domain.visibilities[].topics[].name                          | Yes       | ^[a-z]+(_[a-z]+)*$             | Name of topic                                                                                                    |
 | domain.visibilities[].topics[].version                       | No        | numeric                        | Version of topic                                                                                                 |
 | domain.visibilities[].topics[].description                   | Yes       | string                         | Short description of what kind of events the topic handles                                                       |
@@ -144,6 +145,7 @@ domain:
 | domain.visibilities[].topics[].valueSchema.compatibilityMode | No        | FORWARD_TRANSITIVE, FULL, etc. | Compatibility mode of value schema                                                                               |
 | domain.visibilities[].topics[].config                        | No        | key/value map                  | Configuration parameters in camelCase for topic                                                                  |
 | domain.visibilities[].topics[].consumers[].principal         | No        | ^(User)+\:([0-9]+)*$           | Reference to service account for accessing topics at topic level in format "User:[service-account-id]"           |
+| domain.visibilities[].topics[].consumers[].domain            | No        | ^([a-z]+)\.([a-z]+)\.([a-z]+)$ | Reference to domain for accessing topics at topic level.                                                         |
 
 ## Environment Variables
 The variables can be used as environment variables as well as in a YAML property file.
