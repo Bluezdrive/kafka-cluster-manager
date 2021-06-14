@@ -106,6 +106,7 @@ domain:
     - type: public
       consumers:
         - principal: "User:125382"
+        - domain: "de.volkerfaas.test"
       topics:
         - name: "user_updated" # Full topic name is "de.volkerfaas.arc.public.user_updated"
           version: 1
