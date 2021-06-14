@@ -25,8 +25,8 @@ public class HasValidConfigValidator implements ConstraintValidator<HasValidConf
         final Map<String, String> config = topic.getConfig();
         if (config.containsKey(ApplicationConfiguration.TOPIC_CONFIG_KEY_CLEANUP_POLICY)) {
             final String cleanupPolicy = config.get(ApplicationConfiguration.TOPIC_CONFIG_KEY_CLEANUP_POLICY);
-            if (!cleanupPolicy.matches("^(compact|delete|compact,delete)$")) {
-                context.buildConstraintViolationWithTemplate("must be either compact or delete")
+            if (!cleanupPolicy.matches("^(compact|delete|compact,[ ]{0,1}delete)$")) {
+                context.buildConstraintViolationWithTemplate("must be either compact, delete or compact,delete")
                         .addPropertyNode(ApplicationConfiguration.TOPIC_CONFIG_KEY_CLEANUP_POLICY)
                         .addConstraintViolation();
                 return false;
