@@ -19,7 +19,7 @@ public class HasValidPartitionIncrementationValidator implements ConstraintValid
     @Override
     public boolean isValid(final Topic topic, final ConstraintValidatorContext context) {
         final ValidatorPayload validatorPayload = context.unwrap(HibernateConstraintValidatorContext.class).getConstraintValidatorPayload(ValidatorPayload.class);
-        final TopicConfiguration topicConfiguration = validatorPayload.getKafkaTopics().stream()
+        final TopicConfiguration topicConfiguration = validatorPayload.getTopicConfigurations().stream()
                 .filter(t -> Objects.equals(t.getName(), topic.getFullName()))
                 .findFirst()
                 .orElse(null);

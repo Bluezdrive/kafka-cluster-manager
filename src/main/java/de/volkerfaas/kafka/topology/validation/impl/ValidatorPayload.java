@@ -25,7 +25,7 @@ public class ValidatorPayload {
         return topologies;
     }
 
-    public Collection<TopicConfiguration> getKafkaTopics() {
+    public Collection<TopicConfiguration> getTopicConfigurations() {
         return topicConfigurations;
     }
 }
