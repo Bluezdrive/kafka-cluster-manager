@@ -236,7 +236,7 @@ public class AccessControlServiceImpl implements AccessControlService {
         return producerAclBindings;
     }
 
-    public Set<AclBinding> listAclBindingsForVisibilityOrTopic(final ItemWithConsumers item, final boolean prefix, final Collection<Domain> domains) {
+    public Set<AclBinding> listAclBindingsForVisibilityOrTopic(final ItemWithAccessControl item, final boolean prefix, final Collection<Domain> domains) {
         final String resourceName = getResourceName(item, prefix);
         final List<AccessControl> consumers = item.getConsumers();
         if (Objects.isNull(consumers) || consumers.isEmpty()) {
@@ -260,7 +260,7 @@ public class AccessControlServiceImpl implements AccessControlService {
                 .orElse(null);
     }
 
-    public Set<String> listPrincipals(final ItemWithConsumers item, final Collection<Domain> domains) {
+    public Set<String> listPrincipals(final ItemWithAccessControl item, final Collection<Domain> domains) {
         final List<AccessControl> consumers = item.getConsumers();
         if (Objects.isNull(consumers)) {
             return Collections.emptySet();
@@ -303,7 +303,7 @@ public class AccessControlServiceImpl implements AccessControlService {
         }
     }
 
-    public Set<AclBindingFilter> listOrphanedAclBindingFilters(final ItemWithConsumers item, final boolean prefix, final Collection<Domain> domains) {
+    public Set<AclBindingFilter> listOrphanedAclBindingFilters(final ItemWithAccessControl item, final boolean prefix, final Collection<Domain> domains) {
         final String name = item.getFullName() + (prefix ? "." : "");
         final Set<String> principals = listPrincipals(item, domains);
         try {

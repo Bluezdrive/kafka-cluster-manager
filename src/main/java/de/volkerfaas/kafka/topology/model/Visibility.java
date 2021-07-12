@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-public class Visibility implements ItemWithConsumers {
+public class Visibility implements ItemWithAccessControl {
 
     @JsonFormat(shape = JsonFormat.Shape.OBJECT)
     public enum Type {
@@ -39,11 +39,13 @@ public class Visibility implements ItemWithConsumers {
     private String prefix;
     private Type type = Type.PUBLIC;
     private final List<AccessControl> consumers;
+    private final List<AccessControl> producers;
     private final List<Topic> topics;
 
     public Visibility() {
         this.consumers = new ArrayList<>();
         this.topics = new ArrayList<>();
+        this.producers = new ArrayList<>();
     }
 
     public Visibility(Type type) {
@@ -81,6 +83,12 @@ public class Visibility implements ItemWithConsumers {
     @Override
     public void setPrefix(String prefix) {
         this.prefix = prefix;
+    }
+
+    @Valid
+    @Override
+    public List<AccessControl> getProducers() {
+        return producers;
     }
 
     @JsonIgnore

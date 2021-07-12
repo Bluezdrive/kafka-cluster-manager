@@ -183,6 +183,7 @@ public class SchemaRegistryRepositoryImpl implements SchemaRegistryRepository {
         return schema;
     }
 
+    // TODO: Do not return null on an error, but throw an exception instead.
     public Schema registerSchema(final Schema schema, final String directory) throws IOException, RestClientException {
         final String subject = schema.getSubject();
         final Schema.Type schemaType = schema.getType();

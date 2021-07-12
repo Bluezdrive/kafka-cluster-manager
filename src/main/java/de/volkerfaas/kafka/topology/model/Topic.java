@@ -12,11 +12,12 @@ import static de.volkerfaas.kafka.topology.ApplicationConfiguration.REGEX_TOPIC_
 
 @HasValidPartitionIncrementation
 @HasValidConfig
-public class Topic implements ItemWithConsumers {
+public class Topic implements ItemWithAccessControl {
 
     private final List<String> clusters;
     private final Map<String, String> config;
     private final List<AccessControl> consumers;
+    private final List<AccessControl> producers;
     private String description;
     private Schema keySchema;
     private String name;
@@ -31,6 +32,7 @@ public class Topic implements ItemWithConsumers {
         this.consumers = new ArrayList<>();
         this.config = new HashMap<>();
         this.clusters = new ArrayList<>();
+        this.producers = new ArrayList<>();
     }
 
     public Topic(String name, int numPartitions, short replicationFactor, Map<String, String> config) {
@@ -97,6 +99,12 @@ public class Topic implements ItemWithConsumers {
 
     public void setNumPartitions(int numPartitions) {
         this.numPartitions = numPartitions;
+    }
+
+    @Valid
+    @Override
+    public List<AccessControl> getProducers() {
+        return producers;
     }
 
     public short getReplicationFactor() {
