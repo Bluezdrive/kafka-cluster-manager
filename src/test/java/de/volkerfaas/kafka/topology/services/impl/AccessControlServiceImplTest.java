@@ -126,7 +126,7 @@ class AccessControlServiceImplTest {
             final ClusterConfiguration clusterConfiguration = new ClusterConfiguration("");
             doReturn(clusterConfiguration).when(kafkaClusterRepository).getClusterConfiguration();
             clusterConfiguration.getAclBindings().addAll(accessControlService.listAclBindingsForConsumer(resourceName, principal, true));
-            clusterConfiguration.getAclBindings().addAll(accessControlService.listAclBindingsForProducer(resourceName, principal));
+            clusterConfiguration.getAclBindings().addAll(accessControlService.listAclBindingsForProducer(resourceName, principal, true));
 
             final Set<AclBindingFilter> orphanedAclBindingFilters = accessControlService.listOrphanedAclBindingFilters(domain);
             assertEquals(0, orphanedAclBindingFilters.size());
@@ -149,16 +149,15 @@ class AccessControlServiceImplTest {
             final ClusterConfiguration clusterConfiguration = new ClusterConfiguration("");
             doReturn(clusterConfiguration).when(kafkaClusterRepository).getClusterConfiguration();
             clusterConfiguration.getAclBindings().addAll(accessControlService.listAclBindingsForConsumer(resourceName, oldPrincipal, true));
-            clusterConfiguration.getAclBindings().addAll(accessControlService.listAclBindingsForProducer(resourceName, oldPrincipal));
+            clusterConfiguration.getAclBindings().addAll(accessControlService.listAclBindingsForProducer(resourceName, oldPrincipal, true));
             clusterConfiguration.getAclBindings().addAll(accessControlService.listAclBindingsForConsumer(otherResourceName, otherPrincipal, true));
-            clusterConfiguration.getAclBindings().addAll(accessControlService.listAclBindingsForProducer(otherResourceName, otherPrincipal));
+            clusterConfiguration.getAclBindings().addAll(accessControlService.listAclBindingsForProducer(otherResourceName, otherPrincipal, true));
 
             final Set<AclBindingFilter> orphanedAclBindingFilters = accessControlService.listOrphanedAclBindingFilters(domain);
-            assertEquals(6, orphanedAclBindingFilters.size());
+            assertEquals(5, orphanedAclBindingFilters.size());
             assertThat(orphanedAclBindingFilters, containsInAnyOrder(
                     accessControlService.getAclBinding(ResourceType.TOPIC, resourceName, oldPrincipal, AclOperation.DESCRIBE, true).toFilter(),
                     accessControlService.getAclBinding(ResourceType.TOPIC, resourceName, oldPrincipal, AclOperation.READ, true).toFilter(),
-                    accessControlService.getAclBinding(ResourceType.GROUP, resourceName, oldPrincipal, AclOperation.READ, true).toFilter(),
                     accessControlService.getAclBinding(ResourceType.TOPIC, resourceName, oldPrincipal, AclOperation.WRITE, true).toFilter(),
                     accessControlService.getAclBinding(ResourceType.TRANSACTIONAL_ID, resourceName, oldPrincipal, AclOperation.WRITE, true).toFilter(),
                     accessControlService.getAclBinding(ResourceType.CLUSTER, "kafka-cluster", oldPrincipal, AclOperation.IDEMPOTENT_WRITE, false).toFilter()
@@ -202,18 +201,17 @@ class AccessControlServiceImplTest {
             final ClusterConfiguration clusterConfiguration = new ClusterConfiguration("");
             doReturn(clusterConfiguration).when(kafkaClusterRepository).getClusterConfiguration();
             clusterConfiguration.getAclBindings().addAll(accessControlService.listAclBindingsForConsumer(resourceNameArc, principalArc, true));
-            clusterConfiguration.getAclBindings().addAll(accessControlService.listAclBindingsForProducer(resourceNameArc, principalArc));
+            clusterConfiguration.getAclBindings().addAll(accessControlService.listAclBindingsForProducer(resourceNameArc, principalArc, true));
             clusterConfiguration.getAclBindings().addAll(accessControlService.listAclBindingsForConsumer(resourceNameTest, principalTest, true));
-            clusterConfiguration.getAclBindings().addAll(accessControlService.listAclBindingsForProducer(resourceNameTest, principalTest));
+            clusterConfiguration.getAclBindings().addAll(accessControlService.listAclBindingsForProducer(resourceNameTest, principalTest, true));
             clusterConfiguration.getAclBindings().addAll(accessControlService.listAclBindingsForConsumer(resourceNameRemoved, principalRemoved, true));
-            clusterConfiguration.getAclBindings().addAll(accessControlService.listAclBindingsForProducer(resourceNameRemoved, principalRemoved));
+            clusterConfiguration.getAclBindings().addAll(accessControlService.listAclBindingsForProducer(resourceNameRemoved, principalRemoved, true));
 
             final Set<AclBindingFilter> orphanedAclBindingFilters = accessControlService.listAclBindingFiltersNotInDomains(domains);
-            assertEquals(6, orphanedAclBindingFilters.size());
+            assertEquals(5, orphanedAclBindingFilters.size());
             assertThat(orphanedAclBindingFilters, containsInAnyOrder(
                     accessControlService.getAclBinding(ResourceType.TOPIC, resourceNameRemoved, principalRemoved, AclOperation.DESCRIBE, true).toFilter(),
                     accessControlService.getAclBinding(ResourceType.TOPIC, resourceNameRemoved, principalRemoved, AclOperation.READ, true).toFilter(),
-                    accessControlService.getAclBinding(ResourceType.GROUP, resourceNameRemoved, principalRemoved, AclOperation.READ, true).toFilter(),
                     accessControlService.getAclBinding(ResourceType.TOPIC, resourceNameRemoved, principalRemoved, AclOperation.WRITE, true).toFilter(),
                     accessControlService.getAclBinding(ResourceType.TRANSACTIONAL_ID, resourceNameRemoved, principalRemoved, AclOperation.WRITE, true).toFilter(),
                     accessControlService.getAclBinding(ResourceType.CLUSTER, "kafka-cluster", principalRemoved, AclOperation.IDEMPOTENT_WRITE, false).toFilter()
@@ -286,7 +284,7 @@ class AccessControlServiceImplTest {
             accessControl.setPrincipal(principal);
             visibility.getConsumers().add(accessControl);
 
-            final Set<AclBinding> visibilityAclBindings = accessControlService.listAclBindingsForVisibilityOrTopic(visibility, true, Collections.emptyList());
+            final Set<AclBinding> visibilityAclBindings = accessControlService.listConsumerAclBindingsForVisibilityOrTopic(visibility, true, Collections.emptyList());
             assertEquals(2, visibilityAclBindings.size());
             final String resourceName = visibility.getFullName() + ".";
             assertThat(visibilityAclBindings, containsInAnyOrder(
@@ -314,7 +312,7 @@ class AccessControlServiceImplTest {
             accessControl.setDomain("de.volkerfaas.test");
             visibility.getConsumers().add(accessControl);
 
-            final Set<AclBinding> visibilityAclBindings = accessControlService.listAclBindingsForVisibilityOrTopic(visibility, true, domains);
+            final Set<AclBinding> visibilityAclBindings = accessControlService.listConsumerAclBindingsForVisibilityOrTopic(visibility, true, domains);
             assertEquals(2, visibilityAclBindings.size());
             final String resourceName = visibility.getFullName() + ".";
             assertThat(visibilityAclBindings, containsInAnyOrder(
@@ -338,7 +336,7 @@ class AccessControlServiceImplTest {
             accessControl.setPrincipal(principal);
             topic.getConsumers().add(accessControl);
 
-            final Set<AclBinding> visibilityAclBindings = accessControlService.listAclBindingsForVisibilityOrTopic(topic, false, Collections.emptyList());
+            final Set<AclBinding> visibilityAclBindings = accessControlService.listConsumerAclBindingsForVisibilityOrTopic(topic, false, Collections.emptyList());
             assertEquals(2, visibilityAclBindings.size());
             final String resourceName = topic.getFullName();
             assertThat(visibilityAclBindings, containsInAnyOrder(
@@ -366,7 +364,7 @@ class AccessControlServiceImplTest {
             accessControl.setDomain("de.volkerfaas.test");
             topic.getConsumers().add(accessControl);
 
-            final Set<AclBinding> visibilityAclBindings = accessControlService.listAclBindingsForVisibilityOrTopic(topic, false, domains);
+            final Set<AclBinding> visibilityAclBindings = accessControlService.listConsumerAclBindingsForVisibilityOrTopic(topic, false, domains);
             assertEquals(2, visibilityAclBindings.size());
             final String resourceName = topic.getFullName();
             assertThat(visibilityAclBindings, containsInAnyOrder(
@@ -414,10 +412,9 @@ class AccessControlServiceImplTest {
             final String resourceName = "de.volkerfaas.arc.";
             final String principal = "User:129849";
 
-            final Set<AclBinding> producerAclBindings = accessControlService.listAclBindingsForProducer(resourceName, principal);
-            assertEquals(4, producerAclBindings.size());
+            final Set<AclBinding> producerAclBindings = accessControlService.listAclBindingsForProducer(resourceName, principal, true);
+            assertEquals(3, producerAclBindings.size());
             assertThat(producerAclBindings, containsInAnyOrder(
-                    accessControlService.getAclBinding(ResourceType.GROUP, resourceName, principal, AclOperation.READ, true),
                     accessControlService.getAclBinding(ResourceType.TOPIC, resourceName, principal, AclOperation.WRITE, true),
                     accessControlService.getAclBinding(ResourceType.TRANSACTIONAL_ID, resourceName, principal, AclOperation.WRITE, true),
                     accessControlService.getAclBinding(ResourceType.CLUSTER, "kafka-cluster", principal, AclOperation.IDEMPOTENT_WRITE, false)
@@ -588,18 +585,17 @@ class AccessControlServiceImplTest {
             final ClusterConfiguration clusterConfiguration = new ClusterConfiguration("");
             doReturn(clusterConfiguration).when(kafkaClusterRepository).getClusterConfiguration();
             clusterConfiguration.getAclBindings().addAll(accessControlService.listAclBindingsForConsumer(resourceNameArc, principalArc, true));
-            clusterConfiguration.getAclBindings().addAll(accessControlService.listAclBindingsForProducer(resourceNameArc, principalArc));
+            clusterConfiguration.getAclBindings().addAll(accessControlService.listAclBindingsForProducer(resourceNameArc, principalArc, true));
             clusterConfiguration.getAclBindings().addAll(accessControlService.listAclBindingsForConsumer(resourceNameTest, principalTest, true));
-            clusterConfiguration.getAclBindings().addAll(accessControlService.listAclBindingsForProducer(resourceNameTest, principalTest));
+            clusterConfiguration.getAclBindings().addAll(accessControlService.listAclBindingsForProducer(resourceNameTest, principalTest, true));
             clusterConfiguration.getAclBindings().addAll(accessControlService.listAclBindingsForConsumer(resourceNameRemoved, principalRemoved, true));
-            clusterConfiguration.getAclBindings().addAll(accessControlService.listAclBindingsForProducer(resourceNameRemoved, principalRemoved));
+            clusterConfiguration.getAclBindings().addAll(accessControlService.listAclBindingsForProducer(resourceNameRemoved, principalRemoved, true));
 
             final Collection<AclBindingFilter> orphanedAclBindingFilters = accessControlService.listOrphanedAclBindings(domains);
             assertNotNull(orphanedAclBindingFilters);
             assertThat(orphanedAclBindingFilters, containsInAnyOrder(
                     accessControlService.getAclBinding(ResourceType.TOPIC, resourceNameRemoved, principalRemoved, AclOperation.DESCRIBE, true).toFilter(),
                     accessControlService.getAclBinding(ResourceType.TOPIC, resourceNameRemoved, principalRemoved, AclOperation.READ, true).toFilter(),
-                    accessControlService.getAclBinding(ResourceType.GROUP, resourceNameRemoved, principalRemoved, AclOperation.READ, true).toFilter(),
                     accessControlService.getAclBinding(ResourceType.TOPIC, resourceNameRemoved, principalRemoved, AclOperation.WRITE, true).toFilter(),
                     accessControlService.getAclBinding(ResourceType.TRANSACTIONAL_ID, resourceNameRemoved, principalRemoved, AclOperation.WRITE, true).toFilter(),
                     accessControlService.getAclBinding(ResourceType.CLUSTER, "kafka-cluster", principalRemoved, AclOperation.IDEMPOTENT_WRITE, false).toFilter()

@@ -78,10 +78,12 @@ public class AccessControlServiceImpl implements AccessControlService {
                 .peek(domain -> newAclBindings.addAll(listAclBindingsForDomain(domain)))
                 .map(Domain::getVisibilities)
                 .flatMap(List::stream)
-                .peek(visibility -> newAclBindings.addAll(listAclBindingsForVisibilityOrTopic(visibility, true, domains)))
+                .peek(visibility -> newAclBindings.addAll(listConsumerAclBindingsForVisibilityOrTopic(visibility, true, domains)))
+                .peek(visibility -> newAclBindings.addAll(listProducerAclBindingsForVisibilityOrTopic(visibility, true, domains)))
                 .map(Visibility::getTopics)
                 .flatMap(List::stream)
-                .forEach(topic -> newAclBindings.addAll(listAclBindingsForVisibilityOrTopic(topic, false, domains)));
+                .peek(topic -> newAclBindings.addAll(listConsumerAclBindingsForVisibilityOrTopic(topic, false, domains)))
+                .forEach(topic -> newAclBindings.addAll(listProducerAclBindingsForVisibilityOrTopic(topic, false, domains)));
         return newAclBindings;
     }
 
@@ -201,7 +203,14 @@ public class AccessControlServiceImpl implements AccessControlService {
         final Set<AclBinding> domainAclBindings = new HashSet<>();
         try {
             domainAclBindings.addAll(listAclBindingsForConsumer(resourceName, principal, true));
-            domainAclBindings.addAll(listAclBindingsForProducer(resourceName, principal));
+            domainAclBindings.addAll(listAclBindingsForProducer(resourceName, principal, true));
+
+            final ClusterConfiguration clusterConfiguration = kafkaClusterRepository.getClusterConfiguration();
+            final Collection<AclBinding> aclBindings = clusterConfiguration.getAclBindings();
+            final AclBinding aclBindingGroupRead = getAclBinding(ResourceType.GROUP, resourceName, principal, AclOperation.READ, true);
+            if (isAclNotAvailable(aclBindings, aclBindingGroupRead)) {
+                domainAclBindings.add(aclBindingGroupRead);
+            }
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }
@@ -209,17 +218,17 @@ public class AccessControlServiceImpl implements AccessControlService {
         return domainAclBindings;
     }
 
-    public Set<AclBinding> listAclBindingsForProducer(final String resourceName, final String principal) throws ExecutionException, InterruptedException {
+    public Set<AclBinding> listAclBindingsForProducer(final String resourceName, final String principal, final boolean prefix) throws ExecutionException, InterruptedException {
         final Set<AclBinding> producerAclBindings = new HashSet<>();
         if (Strings.isNotBlank(principal)) {
             final ClusterConfiguration clusterConfiguration = kafkaClusterRepository.getClusterConfiguration();
             final Collection<AclBinding> aclBindings = clusterConfiguration.getAclBindings();
-            final AclBinding aclBindingTopicWrite = getAclBinding(ResourceType.TOPIC, resourceName, principal, AclOperation.WRITE, true);
+            final AclBinding aclBindingTopicWrite = getAclBinding(ResourceType.TOPIC, resourceName, principal, AclOperation.WRITE, prefix);
             if (isAclNotAvailable(aclBindings, aclBindingTopicWrite)) {
                 producerAclBindings.add(aclBindingTopicWrite);
             }
 
-            final AclBinding aclBindingTransactionalIdWrite = getAclBinding(ResourceType.TRANSACTIONAL_ID, resourceName, principal, AclOperation.WRITE, true);
+            final AclBinding aclBindingTransactionalIdWrite = getAclBinding(ResourceType.TRANSACTIONAL_ID, resourceName, principal, AclOperation.WRITE, prefix);
             if (isAclNotAvailable(aclBindings, aclBindingTransactionalIdWrite)) {
                 producerAclBindings.add(aclBindingTransactionalIdWrite);
             }
@@ -228,15 +237,11 @@ public class AccessControlServiceImpl implements AccessControlService {
             if (isAclNotAvailable(aclBindings, aclBindingClusterIdempotentWrite)) {
                 producerAclBindings.add(aclBindingClusterIdempotentWrite);
             }
-            final AclBinding aclBindingGroupRead = getAclBinding(ResourceType.GROUP, resourceName, principal, AclOperation.READ, true);
-            if (isAclNotAvailable(aclBindings, aclBindingGroupRead)) {
-                producerAclBindings.add(aclBindingGroupRead);
-            }
         }
         return producerAclBindings;
     }
 
-    public Set<AclBinding> listAclBindingsForVisibilityOrTopic(final ItemWithAccessControl item, final boolean prefix, final Collection<Domain> domains) {
+    public Set<AclBinding> listConsumerAclBindingsForVisibilityOrTopic(final ItemWithAccessControl item, final boolean prefix, final Collection<Domain> domains) {
         final String resourceName = getResourceName(item, prefix);
         final List<AccessControl> consumers = item.getConsumers();
         if (Objects.isNull(consumers) || consumers.isEmpty()) {
@@ -246,6 +251,21 @@ public class AccessControlServiceImpl implements AccessControlService {
                 .map(consumer -> handleException(() -> {
                     final String principal = resolvePrincipal(domains, consumer);
                     return listAclBindingsForConsumer(resourceName, principal, prefix);
+                }))
+                .flatMap(Set::stream)
+                .collect(Collectors.toUnmodifiableSet());
+    }
+
+    public Set<AclBinding> listProducerAclBindingsForVisibilityOrTopic(final ItemWithAccessControl item, final boolean prefix, final Collection<Domain> domains) {
+        final String resourceName = getResourceName(item, prefix);
+        final List<AccessControl> producers = item.getProducers();
+        if (Objects.isNull(producers) || producers.isEmpty()) {
+            return Collections.emptySet();
+        }
+        return producers.stream()
+                .map(producer -> handleException(() -> {
+                    final String principal = resolvePrincipal(domains, producer);
+                    return listAclBindingsForProducer(resourceName, principal, prefix);
                 }))
                 .flatMap(Set::stream)
                 .collect(Collectors.toUnmodifiableSet());
