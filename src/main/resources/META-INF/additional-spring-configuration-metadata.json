@@ -1,0 +1,94 @@
+{
+  "properties": [
+    {
+      "name": "documentation.filename",
+      "type": "java.lang.String",
+      "description": "Description for documentation.filename."
+    },
+    {
+      "name": "config.type",
+      "type": "java.lang.String",
+      "description": "Description for config.type."
+    },
+    {
+      "name": "config.directory",
+      "type": "java.lang.String",
+      "description": "Description for config.directory."
+    },
+    {
+      "name": "config.resource",
+      "type": "java.lang.String",
+      "description": "Description for config.resource."
+    },
+    {
+      "name": "cluster.kafka.bootstrap.servers",
+      "type": "java.lang.String",
+      "description": "Description for cluster.kafka.bootstrap.servers."
+    },
+    {
+      "name": "cluster.kafka.request.timeout.ms",
+      "type": "java.lang.String",
+      "description": "Description for cluster.kafka.request.timeout.ms."
+    },
+    {
+      "name": "cluster.kafka.retry.backoff.ms",
+      "type": "java.lang.String",
+      "description": "Description for cluster.kafka.retry.backoff.ms."
+    },
+    {
+      "name": "cluster.kafka.security.protocol",
+      "type": "java.lang.String",
+      "description": "Description for cluster.kafka.security.protocol."
+    },
+    {
+      "name": "cluster.kafka.sasl.mechanism",
+      "type": "java.lang.String",
+      "description": "Description for cluster.kafka.sasl.mechanism."
+    },
+    {
+      "name": "cluster.kafka.sasl.jaas.config",
+      "type": "java.lang.String",
+      "description": "Description for cluster.kafka.sasl.jaas.config."
+    },
+    {
+      "name": "cluster.kafka.ssl.endpoint.identification.algorithm",
+      "type": "java.lang.String",
+      "description": "Description for cluster.kafka.ssl.endpoint.identification.algorithm."
+    },
+    {
+      "name": "cluster.schema-registry.schema.registry.url",
+      "type": "java.lang.String",
+      "description": "Description for cluster.schema-registry.schema.registry.url."
+    },
+    {
+      "name": "cluster.schema-registry.basic.auth.credentials.source",
+      "type": "java.lang.String",
+      "description": "Description for cluster.schema-registry.basic.auth.credentials.source."
+    },
+    {
+      "name": "cluster.schema-registry.schema.registry.basic.auth.user.info",
+      "type": "java.lang.String",
+      "description": "Description for cluster.schema-registry.schema.registry.basic.auth.user.info."
+    },
+    {
+      "name": "documentation.events-filename",
+      "type": "java.lang.String",
+      "description": "Description for documentation.events-filename."
+    },
+    {
+      "name": "documentation.topology-filename",
+      "type": "java.lang.String",
+      "description": "Description for documentation.topology-filename."
+    },
+    {
+      "name": "cloud.apiKey",
+      "type": "java.lang.String",
+      "description": "Description for cloud.apiKey."
+    },
+    {
+      "name": "cloud.apiSecret",
+      "type": "java.lang.String",
+      "description": "Description for cloud.apiSecret."
+    }
+  ]
+}

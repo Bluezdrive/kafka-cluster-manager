@@ -1,0 +1,12 @@
+/.idea/
+/.run/
+/*.iml
+/target
+/config
+/topology
+**/.DS_Store
+**/*.cluster
+/*.versionsBackup
+/*.yaml
+/*.properties
+/scripts
