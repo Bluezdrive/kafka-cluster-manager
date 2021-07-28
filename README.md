@@ -311,9 +311,35 @@ docker rm /kafka-cluster-manager > /dev/null 2>&1
 
 ### 1.0
 
--   Create topics
--   Increase partitions
--   Alter Configuration of a topic
--   Restore topology of a domain from the cluster
--   Support for multiple environments
--   Remove orphaned access control list entries at visibility and topic level (do not use in production)
+- Create topics
+- Increase partitions
+- Alter Configuration of a topic
+- Restore topology of a domain from the cluster
+- Support for multiple environments
+- Remove orphaned access control list entries at visibility and topic level (do not use in production)
+
+# Release
+
+Release
+git checkout --orphan release/<release version>
+=> Change version in pom.xml
+git add -A
+git commit -m "Feature: …"
+git merge -s ours master --allow-unrelated-histories -m "Release <release version>"
+git checkout master
+git merge release/<release version>
+git tag -a v<release version> -m "Release <release version>"
+git push origin master
+git push origin v<release version>
+git branch -d release/<release version>
+git branch -d feature/<release version>-SNAPSHOT
+git push origin --delete feature/<release version>-SNAPSHOT
+git checkout -b feature/<next release version>-SNAPSHOT
+=> Change version in pom.xml
+
+1. Build the Kafka Manager
+```shell script
+mvn clean package
+```
+2. Draft a GitHub Release named v<release version>
+3. Upload target/kafka-cluster-manager-<release version>.jar as asset to release
