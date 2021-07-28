@@ -320,7 +320,6 @@ docker rm /kafka-cluster-manager > /dev/null 2>&1
 
 # Release
 
-Release
 git checkout --orphan release/<release version>
 => Change version in pom.xml
 git add -A
