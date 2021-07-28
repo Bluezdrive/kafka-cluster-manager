@@ -320,6 +320,7 @@ docker rm /kafka-cluster-manager > /dev/null 2>&1
 
 # Release
 
+```shell script
 git checkout --orphan release/<release version>
 => Change version in pom.xml
 git add -A
@@ -335,10 +336,11 @@ git branch -d feature/<release version>-SNAPSHOT
 git push origin --delete feature/<release version>-SNAPSHOT
 git checkout -b feature/<next release version>-SNAPSHOT
 => Change version in pom.xml
+```
 
 1. Build the Kafka Manager
 ```shell script
 mvn clean package
 ```
-2. Draft a GitHub Release named v<release version>
-3. Upload target/kafka-cluster-manager-<release version>.jar as asset to release
+2. Draft a GitHub Release named v&lt;release version&gt;
+3. Upload target/kafka-cluster-manager-&lt;release version&gt;.jar as asset to release
