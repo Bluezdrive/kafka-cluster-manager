@@ -50,7 +50,7 @@ public class SchemaRegistryRepositoryImpl implements SchemaRegistryRepository {
         try {
             return schemaRegistryClient.getCompatibility(subject);
         } catch (RestClientException e) {
-            if ((e.getErrorCode() == 40401 || e.getErrorCode() == 40403) && resolveDefault) {
+            if ((e.getErrorCode() == 40401 || e.getErrorCode() == 40403 || e.getErrorCode() == 40408) && resolveDefault) {
                 return getCompatibilityMode(null, false);
             } else {
                 throw e;
@@ -144,7 +144,7 @@ public class SchemaRegistryRepositoryImpl implements SchemaRegistryRepository {
 
             return schema;
         } catch (RestClientException e) {
-            if (e.getErrorCode() == 40401 || e.getErrorCode() == 40403) {
+            if (e.getErrorCode() == 40401 || e.getErrorCode() == 40403 || e.getErrorCode() == 40408) {
                 return null;
             } else {
                 throw e;
@@ -228,7 +228,7 @@ public class SchemaRegistryRepositoryImpl implements SchemaRegistryRepository {
             }
             return schemaRegistryClient.getVersion(subject, parsedSchema);
         } catch (RestClientException e) {
-            if (e.getErrorCode() == 40401 || e.getErrorCode() == 40403) {
+            if (e.getErrorCode() == 40401 || e.getErrorCode() == 40403 || e.getErrorCode() == 40408) {
                 return 0;
             } else {
                 throw e;
@@ -275,7 +275,7 @@ public class SchemaRegistryRepositoryImpl implements SchemaRegistryRepository {
         try {
             return schemaRegistryClient.testCompatibility(subject, parsedSchema);
         } catch (RestClientException e) {
-            if (e.getErrorCode() == 40401 || e.getErrorCode() == 40403) {
+            if (e.getErrorCode() == 40401 || e.getErrorCode() == 40403 || e.getErrorCode() == 40408) {
                 return true;
             } else {
                 throw e;
