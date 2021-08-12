@@ -8,7 +8,7 @@ branches:
 cache:
   directories:
     - $home/.m2/repository
-script: mvn clean package
+script: mvn clean package dockerfile:build
 after_success:
   - mvn test jacoco:report
   - bash <(curl -Ls https://coverage.codacy.com/get.sh) report
@@ -17,6 +17,6 @@ before_deploy:
 deploy:
   - provider: script
     skip_cleanup: true
-    script: mvn dockerfile:build dockerfile:push
+    script: mvn dockerfile:push
     on:
       branch: master
