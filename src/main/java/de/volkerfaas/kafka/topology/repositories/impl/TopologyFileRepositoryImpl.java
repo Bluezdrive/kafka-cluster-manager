@@ -40,7 +40,7 @@ public class TopologyFileRepositoryImpl implements TopologyFileRepository {
     private final boolean dryRun;
 
     @Autowired
-    public TopologyFileRepositoryImpl(final ObjectMapper objectMapper, @Value("${cluster:@null}") final String cluster, @Value("${dry-run:@null}") final String dryRun) {
+    public TopologyFileRepositoryImpl(final ObjectMapper objectMapper, @Value("${cluster:local}") final String cluster, @Value("${dry-run:@null}") final String dryRun) {
         this.objectMapper = objectMapper;
         this.cluster = cluster;
         this.dryRun = Objects.nonNull(dryRun);
